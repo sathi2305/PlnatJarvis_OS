@@ -1,0 +1,2958 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#030a09">
+  <title>PlantTwin JARVIS OS · Windows Bio-Neural Twin &amp; Two-Hand Gesture AI</title>
+  <meta name="description" content="Plant-care digital twin OS combining an interactive 3D plant twin, multilingual JARVIS assistant, plant diaries, watering logs, tasks, reminders, weather lookup, and growth simulation.">
+  <meta property="og:title" content="PlantTwin JARVIS OS">
+  <meta property="og:description" content="Plant-care digital twin OS combining an interactive 3D plant twin, multilingual JARVIS assistant, plant diaries, watering logs, tasks, reminders, weather lookup, and growth simulation.">
+  <meta property="og:type" content="website">
+  <script src="assets/config.js"></script>
+
+  <style>
+    :root {
+      --bg: #030a09;
+      --pn: rgba(8, 26, 22, .78);
+      --ln: rgba(93, 255, 176, .22);
+      --g: #5dffb0;
+      --c: #4de1ff;
+      --w: #ffc857;
+      --r: #ff6b6b;
+      --t: #e6fff3;
+      --m: #8fb8a8;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    html, body { height: 100%; }
+    body {
+      background: radial-gradient(1200px 700px at 50% 40%, #0b2a22 0, var(--bg) 70%);
+      color: var(--t);
+      font: 14px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    }
+    body:before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, rgba(93, 255, 176, .03) 0 1px, transparent 1px 4px);
+      pointer-events: none;
+      z-index: 9;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--ln);
+      flex-wrap: wrap;
+      background: rgba(3, 10, 9, 0.7);
+      backdrop-filter: blur(12px);
+    }
+    .logo {
+      font-weight: 800;
+      letter-spacing: .22em;
+      font-size: 15px;
+      font-family: monospace;
+    }
+    .logo b { color: var(--g); }
+    .chip {
+      font-size: 11px;
+      letter-spacing: .12em;
+      padding: 4px 10px;
+      border: 1px solid var(--ln);
+      border-radius: 99px;
+      color: var(--m);
+      font-family: monospace;
+      display: inline-flex;
+      align-items: center;
+    }
+    .chip i {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--w);
+      margin-right: 6px;
+      box-shadow: 0 0 8px currentColor;
+    }
+    .chip.on i { background: var(--g); }
+    .chip.on { color: var(--g); border-color: var(--g); }
+    .sp { flex: 1; }
+    select, button, input { font: inherit; color: var(--t); }
+    select, .btn {
+      background: rgba(93, 255, 176, .08);
+      border: 1px solid var(--ln);
+      border-radius: 10px;
+      padding: 7px 12px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn:hover, select:hover {
+      border-color: var(--g);
+      box-shadow: 0 0 14px rgba(93, 255, 176, .25);
+    }
+    .btn.pri {
+      background: linear-gradient(135deg, #2cf0a0, #18b6d4);
+      color: #032;
+      font-weight: 700;
+      border: 0;
+    }
+    main {
+      display: grid;
+      grid-template-columns: 350px minmax(0, 1fr) 320px;
+      gap: 14px;
+      padding: 14px;
+      height: calc(100vh - 62px);
+      min-height: 640px;
+    }
+    .pn {
+      background: var(--pn);
+      border: 1px solid var(--ln);
+      border-radius: 18px;
+      padding: 14px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      box-shadow: 0 0 30px rgba(0, 0, 0, .35) inset;
+    }
+    h2 {
+      font-size: 11px;
+      letter-spacing: .2em;
+      color: var(--m);
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-family: monospace;
+    }
+    #orbw { display: grid; place-items: center; position: relative; }
+    #orb { width: 190px; height: 190px; }
+    #state {
+      position: absolute;
+      bottom: 0;
+      font-size: 11px;
+      letter-spacing: .25em;
+      color: var(--g);
+      font-family: monospace;
+      font-weight: 600;
+    }
+    #log, #plog {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px 2px;
+      min-height: 90px;
+      scrollbar-width: thin;
+    }
+    .m {
+      max-width: 92%;
+      padding: 8px 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+    .m.j {
+      background: rgba(93, 255, 176, .1);
+      border: 1px solid var(--ln);
+      border-top-left-radius: 4px;
+    }
+    .m.u {
+      align-self: flex-end;
+      background: rgba(77, 225, 255, .14);
+      border: 1px solid rgba(77, 225, 255, .3);
+      border-top-right-radius: 4px;
+    }
+    #chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 8px 0;
+    }
+    #chips button {
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 99px;
+      border: 1px solid var(--ln);
+      background: transparent;
+      cursor: pointer;
+      color: var(--m);
+      font-family: monospace;
+      transition: all .2s;
+    }
+    #chips button:hover {
+      color: var(--g);
+      border-color: var(--g);
+      background: rgba(93, 255, 176, .08);
+    }
+    form { display: flex; gap: 6px; }
+    input[type=text] {
+      flex: 1;
+      min-width: 0;
+      background: rgba(0, 0, 0, .45);
+      border: 1px solid var(--ln);
+      border-radius: 12px;
+      padding: 10px 12px;
+      outline: 0;
+      font-size: 13px;
+    }
+    input[type=text]:focus { border-color: var(--g); }
+    #twin { position: relative; padding: 0; overflow: hidden; }
+    #cv { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+    #cv:active { cursor: grabbing; }
+    .ov { position: absolute; left: 16px; top: 14px; pointer-events: none; }
+    .ov h1 { font-size: 22px; letter-spacing: .06em; font-family: monospace; font-weight: 700; }
+    .ov small { color: var(--m); letter-spacing: .14em; font-size: 11px; font-family: monospace; }
+    #tm {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 14px;
+      background: rgba(3, 12, 10, .85);
+      border: 1px solid var(--ln);
+      border-radius: 14px;
+      padding: 10px 14px;
+      backdrop-filter: blur(10px);
+    }
+    #tm div {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--m);
+      font-family: monospace;
+    }
+    #tm b { color: var(--g); }
+    input[type=range] { width: 100%; accent-color: var(--g); cursor: pointer; }
+    .tools { position: absolute; right: 14px; top: 14px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: 64%; }
+    .g3 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .rg { text-align: center; padding: 8px 4px; border: 1px solid var(--ln); border-radius: 14px; background: rgba(0, 0, 0, .3); }
+    .ring {
+      --v: 50;
+      --rc: #5dffb0;
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      margin: 0 auto 4px;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--rc) calc(var(--v)*1%), rgba(255, 255, 255, .07) 0);
+      -webkit-mask: radial-gradient(circle 24px, #0000 98%, #000 100%);
+      mask: radial-gradient(circle 24px, #0000 98%, #000 100%);
+      filter: drop-shadow(0 0 6px var(--rc));
+    }
+    .rg .v { font-size: 18px; font-weight: 700; margin-top: -52px; height: 34px; position: relative; line-height: 34px; font-family: monospace; }
+    .rg small { display: block; font-size: 10px; letter-spacing: .14em; color: var(--m); margin-top: 18px; font-family: monospace; }
+    #sp { width: 100%; height: 64px; margin-top: 10px; border-radius: 8px; }
+    .it { display: flex; gap: 8px; align-items: center; font-size: 12px; padding: 6px 8px; border: 1px solid var(--ln); border-radius: 10px; margin-top: 6px; font-family: monospace; }
+    .it span { flex: 1; }
+    #items { overflow: auto; min-height: 0; flex: 1; }
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      background: #06251c;
+      border: 1px solid var(--g);
+      padding: 8px 16px;
+      border-radius: 12px;
+      opacity: 0;
+      transition: .3s;
+      z-index: 20;
+      pointer-events: none;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    #toast.s { opacity: 1; }
+    [hidden] { display: none !important; }
+    #en {
+      position: fixed;
+      left: 50%;
+      bottom: 70px;
+      transform: translateX(-50%);
+      z-index: 25;
+      background: #06251c;
+      border: 1px solid var(--g);
+      padding: 10px 18px;
+      border-radius: 99px;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 12px;
+      box-shadow: 0 0 20px rgba(93, 255, 176, .35);
+      transition: all .2s;
+    }
+    #en:hover {
+      background: #0d382b;
+      box-shadow: 0 0 28px rgba(93, 255, 176, .6);
+      transform: translateX(-50%) scale(1.02);
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 5, 4, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-box {
+      background: #061c16;
+      border: 1px solid var(--g);
+      border-radius: 16px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 0 32px rgba(93, 255, 176, 0.25);
+      padding: 20px;
+      font-family: monospace;
+    }
+    .modal-hdr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .modal-hdr h3 {
+      font-size: 13px;
+      letter-spacing: .12em;
+      color: var(--g);
+      margin: 0;
+    }
+    .tabs { display: flex; gap: 6px; margin-bottom: 8px; }
+    .tabs button {
+      flex: 1;
+      padding: 7px;
+      border: 1px solid var(--ln);
+      border-radius: 10px;
+      background: transparent;
+      cursor: pointer;
+      color: var(--m);
+      letter-spacing: .12em;
+      font-size: 11px;
+      font-family: monospace;
+      font-weight: 700;
+    }
+    .tabs .on { background: rgba(93, 255, 176, .16); color: var(--g); border-color: var(--g); }
+    #hw {
+      position: absolute;
+      left: 16px;
+      bottom: 96px;
+      width: 190px;
+      border-radius: 10px;
+      border: 1px solid var(--g);
+      transform: scaleX(-1);
+      pointer-events: none;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 0 16px rgba(93, 255, 176, .3);
+    }
+    #hw video { display: block; width: 100%; }
+    #hw canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #hc {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--c);
+      pointer-events: none;
+      z-index: 30;
+      box-shadow: 0 0 18px var(--c);
+      background: conic-gradient(rgba(93, 255, 176, .75) calc(var(--p, 0)*360deg), transparent 0);
+      transform: translate(-50%, -50%);
+    }
+    #th {
+      position: absolute;
+      left: 16px;
+      top: 78px;
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid var(--g);
+      box-shadow: 0 0 12px rgba(93, 255, 176, .3);
+    }
+    @media (min-width: 1101px) {
+      body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+      main { flex: 1; height: auto; min-height: 0; }
+    }
+    @media (max-width: 1100px) {
+      main { grid-template-columns: 1fr; height: auto; }
+      #twin { height: 70vh; min-height: 480px; order: -1; }
+      #log, #plog { max-height: 260px; }
+    }
+    @media (max-width: 600px) {
+      .tools { top: auto; bottom: 100px; right: 14px; max-width: none; }
+      .ov h1 { font-size: 18px; }
+      #orb { width: 150px; height: 150px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+    }
+  
+    /* --- Enhanced Real Human Hand Tracking & Voice HUD --- */
+    #speech-hud {
+      position: fixed;
+      left: 50%;
+      top: 68px;
+      transform: translateX(-50%);
+      background: rgba(3, 16, 13, 0.94);
+      border: 1px solid var(--c);
+      padding: 8px 18px;
+      border-radius: 99px;
+      font-family: monospace;
+      font-size: 13px;
+      color: var(--c);
+      box-shadow: 0 0 24px rgba(77, 225, 255, 0.45);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+      backdrop-filter: blur(12px);
+      transition: all 0.25s ease;
+    }
+    #speech-hud i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--c);
+      box-shadow: 0 0 10px var(--c);
+      animation: pulse-hud 1s infinite alternate;
+      display: inline-block;
+    }
+    @keyframes pulse-hud {
+      0% { transform: scale(0.8); opacity: 0.6; }
+      100% { transform: scale(1.3); opacity: 1; }
+    }
+    #sec-banner {
+      background: linear-gradient(90deg, rgba(255, 107, 107, 0.18), rgba(255, 200, 87, 0.18));
+      border-bottom: 1px solid var(--w);
+      color: var(--t);
+      padding: 8px 18px;
+      font-family: monospace;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      z-index: 30;
+      position: relative;
+    }
+    #sec-banner a, #sec-banner button {
+      color: #032;
+      background: var(--w);
+      border: 0;
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-weight: 700;
+      font-size: 11px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    /* Upgraded Real Human Hand Camera Monitor */
+    #hw {
+      position: absolute;
+      left: 16px;
+      bottom: 84px;
+      width: 240px;
+      border-radius: 14px;
+      border: 1.5px solid var(--g);
+      background: rgba(3, 14, 11, 0.94);
+      box-shadow: 0 0 24px rgba(93, 255, 176, 0.35);
+      z-index: 15;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      transition: width 0.25s ease, height 0.25s ease;
+      font-family: monospace;
+    }
+    #hw.hw-large {
+      width: 360px;
+    }
+    .hw-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 10px;
+      background: rgba(93, 255, 176, 0.12);
+      border-bottom: 1px solid var(--ln);
+      font-size: 10px;
+      letter-spacing: .08em;
+      color: var(--g);
+    }
+    .hw-bar button {
+      background: transparent;
+      border: 0;
+      color: var(--m);
+      cursor: pointer;
+      font-size: 13px;
+      padding: 0 4px;
+    }
+    .hw-bar button:hover { color: var(--g); }
+    .hw-video-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4/3;
+      background: #000;
+      overflow: hidden;
+    }
+    #hw video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      display: block;
+    }
+    #hw canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform: scaleX(-1);
+    }
+    #hand-gesture-hud {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, transparent 100%);
+      padding: 6px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      color: var(--g);
+      text-align: center;
+      text-shadow: 0 0 8px rgba(93, 255, 176, 0.8);
+      pointer-events: none;
+    }
+    .hw-hint {
+      padding: 4px 8px;
+      font-size: 9.5px;
+      color: var(--m);
+      background: rgba(0, 0, 0, 0.4);
+      border-top: 1px solid rgba(93, 255, 176, 0.1);
+      line-height: 1.35;
+      text-align: center;
+    }
+    /* Push to Talk Button & VU */
+    #btn-ptt {
+      transition: all 0.2s;
+    }
+    #btn-ptt.listening {
+      background: rgba(255, 107, 107, 0.25) !important;
+      border-color: var(--r) !important;
+      color: #fff !important;
+      box-shadow: 0 0 16px rgba(255, 107, 107, 0.5);
+    }
+    /* Diagnostics Modal */
+    .diag-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin: 14px 0;
+      max-height: 55vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .diag-item {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--ln);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .diag-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .diag-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 99px;
+      letter-spacing: .08em;
+      font-family: monospace;
+    }
+    .diag-badge.pass { background: rgba(93, 255, 176, 0.2); color: var(--g); border: 1px solid var(--g); }
+    .diag-badge.fail { background: rgba(255, 107, 107, 0.2); color: var(--r); border: 1px solid var(--r); }
+    .diag-badge.warn { background: rgba(255, 200, 87, 0.2); color: var(--w); border: 1px solid var(--w); }
+    .diag-desc {
+      font-size: 11px;
+      color: var(--m);
+      line-height: 1.45;
+    }
+    .diag-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">PLANT<b>TWIN</b> · JARVIS <b>ADVANCED</b> <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(77,225,255,0.15);border:1px solid var(--c);color:var(--c)">WIN-64</span></div>
+  <span class="chip" id="lk"><i></i><span>LOCAL MODE</span></span>
+  <span class="chip">SIMULATED TELEMETRY</span>
+  <span class="chip" id="cw" title="Voice assistant status - click to open diagnostics">🎙 VOICE: STARTING</span>
+  <canvas id="hdr-vu" width="36" height="18" style="vertical-align:middle;border-radius:4px;background:rgba(0,0,0,0.35);border:1px solid var(--ln)" title="Real-time Microphone Audio VU Level"></canvas>
+  <span class="chip" id="ch" title="Two-hand AR gesture tracking - click to open diagnostics">🖐 HAND: STARTING</span>
+  <a id="btn-why-blocked" class="btn" href="check.html" target="_blank" style="padding:4px 8px;font-size:11px;font-family:monospace;color:var(--w);border-color:var(--w);text-decoration:none" hidden>WHY BLOCKED? ↗</a>
+  <div class="sp"></div>
+  <select id="lang" aria-label="Language">
+    <option>English</option>
+    <option>Tamil</option>
+    <option>Hindi</option>
+    <option>Malayalam</option>
+    <option>Telugu</option>
+    <option>Kannada</option>
+  </select>
+  <button id="btn-fs" class="btn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">⛶ Fullscreen</button>
+</header>
+<div id="sec-banner" hidden>
+  <span id="sec-banner-text">⚠️ Browser security policy or iframe confinement is restricting camera/microphone.</span>
+  <div style="display:flex;gap:8px">
+    <a id="sec-banner-link" href="check.html" target="_blank">↗ Sensor Diagnostics &amp; Direct Tab</a>
+  </div>
+</div>
+<div id="speech-hud" hidden><i></i><span id="speech-hud-text">Listening for voice...</span></div>
+
+<main>
+  <!-- Zone 1: JARVIS & Plant AI Panel -->
+  <section class="pn" aria-label="JARVIS">
+    <div class="tabs">
+      <button id="tj" class="on">J.A.R.V.I.S</button>
+      <button id="tp">PLANT AI</button>
+    </div>
+    <div id="orbw" style="cursor:pointer" title="Click JARVIS Orb or say 'Hey Jarvis' to speak directly!">
+      <canvas id="orb" width="340" height="340"></canvas>
+      <div id="state">STANDBY</div>
+    </div>
+    <div style="font-size:9.5px;letter-spacing:.12em;color:var(--m);font-family:monospace;text-align:center;margin-top:2px;margin-bottom:6px">TAP ORB OR SAY "HEY JARVIS" TO SPEAK</div>
+    <div id="log" aria-live="polite"></div>
+    <div id="plog" aria-live="polite" hidden></div>
+    <div id="chips"></div>
+    <form id="f">
+      <input type="text" id="q" placeholder="Command JARVIS or speak…" autocomplete="off" aria-label="Command">
+      <button class="btn pri">Send</button>
+    </form>
+  </section>
+
+  <!-- Zone 2: 3D Plant Digital Twin -->
+  <section class="pn" id="twin" aria-label="Plant digital twin">
+    <div id="weather-badge" class="chip" style="position:absolute;top:14px;right:16px;z-index:12;background:rgba(8,26,22,.85);border:1px solid var(--ln);font-size:11px;padding:4px 10px;font-family:monospace;letter-spacing:.08em;backdrop-filter:blur(8px);cursor:pointer;display:inline-flex;align-items:center;gap:6px" title="Click to cycle Sunny / Rainy / Default microclimate ambience">
+      <span id="wb-icon">☀️</span> <span id="wb-text">SUNNY · WARM AMBIENT</span>
+    </div>
+    <canvas id="cv"></canvas>
+    <div class="ov">
+      <h1 id="pn">AURA-VITA Bio-Neural Twin</h1>
+      <small>CYBERNETIC BIO-NEURAL TWIN · TWO-HAND SPATIAL AR CONTROL</small>
+    </div>
+    <div class="tools">
+      <button class="btn" id="bph" title="Or drag a photo onto the plant">📷 Photo → Twin</button>
+    </div>
+    <img id="th" alt="Uploaded plant photo" hidden>
+    <div id="hw" hidden>
+      <div class="hw-bar">
+        <span class="hw-title">🙌 TWO-HAND AR SPATIAL CONTROLLER</span>
+        <button type="button" id="hw-toggle-size" title="Toggle camera size">⛶</button>
+      </div>
+      <div class="hw-video-box">
+        <video id="hv" muted playsinline></video>
+        <canvas id="ho"></canvas>
+        <div id="hand-gesture-hud">SHOW YOUR PALM</div>
+      </div>
+      <div class="hw-hint">Left Hand: high palm = rain · Right Hand: palm tilt = 3D orbit · Both hands: spread = zoom · pinch = click</div>
+    </div>
+    <input type="file" id="fi" accept="image/*" hidden>
+    <div id="tm">
+      <div>
+        <span>PLANT TIME MACHINE · illustrative growth scenario</span>
+        <span>Day <b id="dv">0</b></span>
+      </div>
+      <input type="range" id="day" min="0" max="90" value="0" aria-label="Simulated day">
+    </div>
+  </section>
+
+  <!-- Zone 3: Telemetry & Reminders Panel -->
+  <aside class="pn" aria-label="Telemetry">
+    <h2>TWIN TELEMETRY</h2>
+    <div class="g3" id="gs"></div>
+    <canvas id="sp" width="560" height="128"></canvas>
+    <h2 style="margin-top:14px">TASKS &amp; REMINDERS <span id="ic"></span></h2>
+    <div id="items"></div>
+    <div class="chip" style="margin-top:10px;border-radius:10px;font-size:10px;line-height:1.4">
+      Values are app-simulated, not live sensor readings.
+    </div>
+  </aside>
+</main>
+
+<div id="hc" hidden></div>
+<div id="en" hidden>👆 Tap anywhere to enable camera &amp; microphone</div>
+<div id="toast"></div>
+
+<div id="modal-perms" class="modal-backdrop" hidden>
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>CAMERA &amp; MICROPHONE PERMISSIONS</h3>
+      <button type="button" class="btn" id="modal-perms-close" style="padding:2px 8px;font-size:12px">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:12px;color:var(--g);font-size:13px">Unblocked camera &amp; microphone in your browser settings? Tap below to connect instantly.</p>
+      <div style="background:rgba(0,0,0,.45);border:1px solid var(--ln);border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;line-height:1.6">
+        <div><b>1. Browser Settings:</b> Click the 🔒 or tune icon on the left of your address bar ➔ Set <b>Camera</b> and <b>Microphone</b> to <b>Allow</b>.</div>
+        <div style="margin-top:8px"><b>2. Embedded iFrame:</b> If viewing inside an iframe container, open directly in a new tab so your browser provides direct hardware permission access.</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button type="button" id="modal-btn-activate" class="btn pri" style="flex:1;padding:8px 12px;font-size:12px">⚡ Connect Sensors Now</button>
+        <button type="button" id="modal-btn-diag" class="btn" style="padding:8px 12px;font-size:12px;color:var(--c);border-color:var(--c)">🛠️ Open Diagnostics</button>
+        <a id="modal-btn-popout" class="btn" href="" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;font-size:12px">↗ Open in Direct Tab</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-diagnostics" class="modal-backdrop" hidden>
+  <div class="modal-box" style="max-width:580px">
+    <div class="modal-hdr">
+      <h3>🛠️ SENSOR &amp; PERMISSION DIAGNOSTICS</h3>
+      <button type="button" class="btn" id="modal-diag-close" style="padding:2px 8px;font-size:12px">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--m);font-size:12px;margin-bottom:10px">Live status of your browser security context, iframe isolation, camera, microphone, and speech engine.</p>
+      
+      <div class="diag-grid">
+        <div class="diag-item" id="diag-sec">
+          <div class="diag-header">
+            <span>1. Security Context (HTTPS)</span>
+            <span class="diag-badge" id="diag-sec-status">CHECKING</span>
+          </div>
+          <div class="diag-desc" id="diag-sec-desc">Verifying window.isSecureContext and protocol...</div>
+        </div>
+
+        <div class="diag-item" id="diag-frame">
+          <div class="diag-header">
+            <span>2. Iframe Isolation</span>
+            <span class="diag-badge" id="diag-frame-status">CHECKING</span>
+          </div>
+          <div class="diag-desc" id="diag-frame-desc">Checking whether running directly or nested in an iframe container...</div>
+          <div class="diag-actions">
+            <a id="diag-btn-breakout" class="btn" href="" target="_blank" style="font-size:11px;padding:4px 8px;text-decoration:none;display:inline-flex;align-items:center;gap:4px">↗ Open in Direct Window (Bypass Iframe)</a>
+          </div>
+        </div>
+
+        <div class="diag-item" id="diag-mic">
+          <div class="diag-header">
+            <span>3. Microphone Hardware &amp; Stream</span>
+            <span class="diag-badge" id="diag-mic-status">CHECKING</span>
+          </div>
+          <div class="diag-desc" id="diag-mic-desc">Testing getUserMedia({ audio: true })...</div>
+          <div class="diag-actions">
+            <button type="button" class="btn" id="diag-btn-test-mic" style="font-size:11px;padding:4px 8px">Test Microphone</button>
+            <span id="diag-mic-level" style="font-size:11px;color:var(--g);display:inline-flex;align-items:center"></span>
+          </div>
+        </div>
+
+        <div class="diag-item" id="diag-speech">
+          <div class="diag-header">
+            <span>4. Web Speech Recognition Engine</span>
+            <span class="diag-badge" id="diag-speech-status">CHECKING</span>
+          </div>
+          <div class="diag-desc" id="diag-speech-desc">Testing SpeechRecognition / webkitSpeechRecognition...</div>
+          <div class="diag-actions">
+            <button type="button" class="btn" id="diag-btn-test-speech" style="font-size:11px;padding:4px 8px">Test Voice Recognition (Speak Now)</button>
+          </div>
+        </div>
+
+        <div class="diag-item" id="diag-cam">
+          <div class="diag-header">
+            <span>5. Camera Hardware &amp; Resolution</span>
+            <span class="diag-badge" id="diag-cam-status">CHECKING</span>
+          </div>
+          <div class="diag-desc" id="diag-cam-desc">Testing getUserMedia({ video: true })...</div>
+          <div class="diag-actions">
+            <button type="button" class="btn" id="diag-btn-test-cam" style="font-size:11px;padding:4px 8px">Test Camera Stream</button>
+          </div>
+        </div>
+
+        <div class="diag-item" id="diag-mediapipe">
+          <div class="diag-header">
+            <span>6. Google MediaPipe Hands Model</span>
+            <span class="diag-badge" id="diag-mp-status">CHECKING</span>
+          </div>
+          <div class="diag-desc" id="diag-mp-desc">Testing vendor/mediapipe/hands.js and CDN fallback...</div>
+        </div>
+
+        <div class="diag-item" id="diag-tts">
+          <div class="diag-header">
+            <span>7. Voice Speech Audio (TTS)</span>
+            <span class="diag-badge pass">READY</span>
+          </div>
+          <div class="diag-desc">Browser SpeechSynthesis voice playback unlock.</div>
+          <div class="diag-actions">
+            <button type="button" class="btn" id="diag-btn-test-tts" style="font-size:11px;padding:4px 8px">🔊 Test JARVIS Voice Audio</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px">
+        <button type="button" id="diag-btn-run-all" class="btn pri" style="padding:6px 14px;font-size:12px">⚡ Run All Diagnostics</button>
+        <button type="button" class="btn" id="modal-diag-done" style="padding:6px 14px;font-size:12px">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s), cl = (v, a, b) => Math.max(a, Math.min(b, v));
+
+// Safe non-baking of 127.0.0.1 in public deployment
+const LOCALHOST = ["localhost", "127.0.0.1", ""].includes(location.hostname);
+let CFG = window.PLANTTWIN_API_BASE_URL || "";
+if (!LOCALHOST && /\/\/(127\.0\.0\.1|localhost)/.test(CFG)) CFG = "";
+const B = (CFG || "").replace(/\/$/, "");
+
+const S = {
+  id: "aura-vita-01",
+  name: "AURA-VITA Bio-Neural Twin",
+  moist: 52,
+  health: 96,
+  temp: 24,
+  hum: 58,
+  lux: 680,
+  lt: 680,
+  day: 0,
+  weather: {
+    condition: "sunny",
+    city: "Local Microclimate",
+    tempC: 26,
+    humidity: 50,
+    weatherCode: 0,
+    desc: "Sunny / Clear Sky"
+  }
+};
+try { Object.assign(S, JSON.parse(localStorage.getItem("ptj13") || "{}")); } catch (e) {}
+const save = () => { try { localStorage.setItem("ptj13", JSON.stringify(S)); } catch (e) {} };
+
+let link = false, speaking = false, listening = false, auto = true, yaw = .6, pitch = .28, zoom = 1, en = .1, lastWarn = 0;
+const hist = [];
+
+// Built-in 11 Species Botanical Knowledge Base (Offline Grounding)
+const LOCAL_KB = {
+  fern: { name: "AURA-VITA Bio-Neural Twin", arch: "broad", petSafe: true, waterDays: 4, light: "indirect", notes: "Futuristic bio-neural digital twin with cyber-symbiotic leaves, real-time transpiration telemetry, and ambient light synchronization. Safe for pets." },
+  monstera: { name: "Monstera Deliciosa", arch: "broad", petSafe: false, waterDays: 7, light: "indirect", notes: "Iconic split leaves. Contains oxalates, toxic to pets." },
+  snake_plant: { name: "Snake Plant", arch: "strap", petSafe: false, waterDays: 14, light: "low", notes: "Drought-hardy upright blades. Mildly toxic to pets." },
+  peace_lily: { name: "Peace Lily", arch: "broad", petSafe: false, waterDays: 5, light: "low", notes: "Deep emerald foliage, white blooms. Toxic to pets." },
+  fiddle_leaf: { name: "Fiddle Leaf Fig", arch: "broad", petSafe: false, waterDays: 8, light: "indirect", notes: "Violin-shaped leaves. Needs bright indirect light. Toxic to pets." },
+  pothos: { name: "Golden Pothos", arch: "small", petSafe: false, waterDays: 7, light: "low", notes: "Trailing vines, hardy air purifier. Toxic to pets." },
+  zz_plant: { name: "ZZ Plant", arch: "small", petSafe: false, waterDays: 16, light: "low", notes: "Glossy waxy foliage, rhizomatous water storage." },
+  spider_plant: { name: "Spider Plant", arch: "strap", petSafe: true, waterDays: 6, light: "indirect", notes: "Arching leaves, produces plantlets. Completely non-toxic." },
+  jade_plant: { name: "Jade Plant", arch: "rosette", petSafe: false, waterDays: 14, light: "direct", notes: "Succulent tree, likes sun. Toxic to pets." },
+  calathea: { name: "Calathea Prayer Plant", arch: "broad", petSafe: true, waterDays: 5, light: "indirect", notes: "Folds leaves at night. Non-toxic and pet-safe." },
+  aloe_vera: { name: "Aloe Vera", arch: "rosette", petSafe: false, waterDays: 18, light: "direct", notes: "Succulent gel plant. Toxic to pets if chewed." },
+};
+
+async function api(p, o = {}, t = 4000) {
+  try {
+    const url = B ? (B + p) : p;
+    const r = await fetch(url, { ...o, headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(t) });
+    if (!r.ok) return null;
+    link = true;
+    return await r.json();
+  } catch (e) {
+    link = false;
+    return null;
+  }
+}
+
+const toast = m => {
+  const t = $("#toast");
+  t.textContent = m;
+  t.className = "s";
+  clearTimeout(toast.h);
+  toast.h = setTimeout(() => t.className = "", 2600);
+};
+
+/* ---------- JARVIS chat + voice ---------- */
+const log = $("#log");
+function add(role, text, L) {
+  L = L || log;
+  const e = document.createElement("div");
+  e.className = "m " + (role === "j" ? "j" : "u");
+  L.appendChild(e);
+  if (role !== "j" || matchMedia("(prefers-reduced-motion:reduce)").matches) {
+    e.textContent = text;
+  } else {
+    let i = 0;
+    const h = setInterval(() => {
+      e.textContent = text.slice(0, ++i);
+      L.scrollTop = 1e9;
+      if (i >= text.length) clearInterval(h);
+    }, 14);
+  }
+  L.scrollTop = 1e9;
+}
+
+const LC = { English: "en-US", Tamil: "ta-IN", Hindi: "hi-IN", Malayalam: "ml-IN", Telugu: "te-IN", Kannada: "kn-IN" };
+
+function say(text, t) {
+  add("j", text, t || log);
+  if (!("speechSynthesis" in window)) {
+    speaking = true;
+    setTimeout(() => {
+      speaking = false;
+      awaitUntil = Date.now() + 6000;
+      if (always && !micState.listening) wakeLoop();
+    }, text.length * 45);
+    return;
+  }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text.replace(/^JARVIS:\s*/, ""));
+  u.lang = LC[$("#lang").value] || "en-US";
+  u.onstart = () => { speaking = true; };
+  u.onend = u.onerror = () => {
+    speaking = false;
+    awaitUntil = Date.now() + 6000;
+    if (always && !micState.listening) {
+      setTimeout(wakeLoop, 150);
+    }
+  };
+  speechSynthesis.speak(u);
+}
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+const status = () => `${S.name}: hydration ${S.moist.toFixed(0)}%, vigor ${S.health.toFixed(0)}/100, ${S.temp.toFixed(1)}°C, humidity ${S.hum.toFixed(0)}%, light ${S.lux.toFixed(0)} lux. ${S.moist < 30 ? "Hydration is low — I recommend watering." : S.health < 70 ? "Vigor is below ideal; check light and temperature." : "All parameters are in a comfortable range."} (Simulated values, not live sensors.)`;
+
+async function water() {
+  startRain();
+  const r = await api(`/api/plants/${S.id}/water`, { method: "POST", body: JSON.stringify({ amount: 22 }) });
+  save();
+  say(`Making it rain. ${r ? "Logged as a watering event in the database" : "Logged in this browser only (backend offline)"}. Hydration rises over the next few seconds (simulated).`);
+}
+
+async function loadItems() {
+  const l = await api("/api/assistant/items?include_completed=false");
+  const box = $("#items");
+  box.innerHTML = "";
+  if (!l) {
+    box.innerHTML = '<div class="it"><span>Start the backend to sync tasks, or run local mode.</span></div>';
+    return;
+  }
+  $("#ic").textContent = "· " + l.length;
+  l.slice(0, 12).forEach(x => {
+    const d = document.createElement("div");
+    d.className = "it";
+    d.innerHTML = `<span>${x.kind === "reminder" ? "⏰" : "✅"} </span><button class="btn" style="padding:2px 8px;font-size:11px">Done</button>`;
+    d.firstChild.append(x.title + (x.due_at ? " · " + new Date(x.due_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" }) : ""));
+    d.querySelector("button").onclick = async () => {
+      await api("/api/assistant/items/" + x.id, { method: "PATCH", body: JSON.stringify({ completed: true }) });
+      loadItems();
+    };
+    box.appendChild(d);
+  });
+}
+
+async function cmd(raw) {
+  const q = (raw || "").trim();
+  if (!q) return;
+  add("u", q, mode === "p" ? $("#plog") : log);
+  $("#q").value = "";
+  if (mode === "p") return plantChat(q);
+  const s = q.toLowerCase();
+  let m;
+  if (await extra(s, q)) return;
+  if (/^(please )?(water|give water)|water (it|the plant|now)/.test(s)) return water();
+  if (/status|health|report|summary|how is/.test(s)) return say(status());
+  if (m = s.match(/remind me to (.+?)(?: in (\d+) ?(min|minute|hour|hr)s?)?$/)) {
+    const mins = m[2] ? +m[2] * (/h/.test(m[3]) ? 60 : 1) : 60;
+    const r = await api("/api/assistant/items", { method: "POST", body: JSON.stringify({ kind: "reminder", title: m[1], due_at: new Date(Date.now() + mins * 6e4).toISOString() }) });
+    if (r) loadItems();
+    return say(r ? `Reminder set: "${m[1]}" in ${mins} minutes.` : `Reminder saved locally: "${m[1]}" in ${mins} minutes.`);
+  }
+  if (/future|grow|simulate|time machine|\bdays?\b/.test(s)) {
+    m = s.match(/(\d+)/);
+    setDay(m ? cl(+m[1], 0, 90) : 60);
+    return say(`Projecting day ${S.day}. This is an illustrative growth scenario, not a biological forecast.`);
+  }
+  if (/today|present|reset time|now$/.test(s)) {
+    setDay(0);
+    return say("Returned to the present.");
+  }
+  if (m = s.match(/light (?:to )?(\d+)/)) {
+    S.lt = cl(+m[1], 0, 3000);
+    return say(`Target light set to ${S.lt} lux.`);
+  }
+  if (/rotate|spin/.test(s)) {
+    auto = !auto;
+    return say(auto ? "Auto-rotation on." : "Auto-rotation off.");
+  }
+  if (/(weather|forecast|climate|temperature outside)/.test(s)) {
+    const c = (s.match(/ in ([a-z ]+)/) || [])[1] || S.weather?.city || "London";
+    await fetchAndUpdateWeather(c.trim());
+    return;
+  }
+  if (/(sunny|make it sunny|set weather sunny|sunshine|clear sky)/.test(s)) {
+    setWeatherMode("sunny", "Sunny weather simulation active. 3D plant twin background and ambient light calibrated to a warmer golden hue.");
+    return;
+  }
+  if (/(rainy|make it rainy|set weather rainy|stormy|overcast|drizzle weather)/.test(s)) {
+    setWeatherMode("rainy", "Rainy weather simulation active. 3D plant twin background and ambient light shifted to a desaturated, cooler hue.");
+    return;
+  }
+  if (/(default weather|reset weather|normal lighting|greenhouse lighting)/.test(s)) {
+    setWeatherMode("default", "Ambient lighting reset to standard holographic greenhouse mode.");
+    return;
+  }
+  if (/^(help|commands)/.test(s)) {
+    return say("Try: make it rain · sunny weather · rainy weather · gestures · status · show 60 days · light 1200 · weather in Tokyo · rotate · tap the Orb to speak directly");
+  }
+
+  const r = await api("/api/jarvis/chat", { method: "POST", body: JSON.stringify({ message: q, language: $("#lang").value, plant: { id: S.id, name: S.name, moisture: Math.round(S.moist), health: Math.round(S.health), temperature_c: +S.temp.toFixed(1), humidity: Math.round(S.hum), light_lux: Math.round(S.lux) } }) }, 22000);
+  say(r ? r.answer : `JARVIS local mode: Telemetry for ${S.name} shows ${Math.round(S.moist)}% hydration and ${Math.round(S.health)}/100 vigor. Type "help" for local commands.`);
+}
+
+function updateWeatherUI() {
+  const w = S.weather || { condition: "sunny", tempC: 25 };
+  const icon = $("#wb-icon"), txt = $("#wb-text");
+  if (!icon || !txt) return;
+  if (w.condition === "sunny") {
+    icon.textContent = "☀️";
+    txt.textContent = `SUNNY · WARM AMBIENT (${w.tempC || 26}°C)`;
+  } else if (w.condition === "rainy") {
+    icon.textContent = "🌧️";
+    txt.textContent = `RAINY · COOL DESATURATED (${w.tempC || 18}°C)`;
+  } else {
+    icon.textContent = "🌿";
+    txt.textContent = `GREENHOUSE · ${w.tempC || 24}°C`;
+  }
+}
+
+function setWeatherMode(cond, speakMsg) {
+  if (!S.weather) S.weather = {};
+  S.weather.condition = cond;
+  if (cond === "sunny") {
+    S.weather.weatherCode = 0;
+    S.weather.desc = "Sunny / Clear Sky";
+    S.weather.tempC = S.weather.tempC || 26;
+  } else if (cond === "rainy") {
+    S.weather.weatherCode = 61;
+    S.weather.desc = "Rainfall Precipitation";
+    S.weather.tempC = S.weather.tempC || 18;
+    startRain();
+  } else {
+    S.weather.weatherCode = 2;
+    S.weather.desc = "Standard Microclimate";
+  }
+  updateWeatherUI();
+  if (speakMsg) say(speakMsg);
+}
+
+async function fetchAndUpdateWeather(city = "London") {
+  try {
+    let data = await api("/api/weather?city=" + encodeURIComponent(city), {}, 5000);
+    let temp, hum, code, cityName, desc;
+    if (data && data.location && data.current) {
+      cityName = data.location.name;
+      temp = Math.round(data.current.temperature_2m);
+      hum = Math.round(data.current.relative_humidity_2m);
+      code = data.current.weather_code || 0;
+    } else {
+      const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
+      const geo = await geoRes.json();
+      if (!geo.results || geo.results.length === 0) throw new Error("City not found");
+      const loc = geo.results[0];
+      cityName = loc.name;
+      const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day`);
+      const wJson = await wRes.json();
+      temp = Math.round(wJson.current.temperature_2m);
+      hum = Math.round(wJson.current.relative_humidity_2m);
+      code = wJson.current.weather_code || 0;
+    }
+    const isRain = code >= 51;
+    const isSun = code <= 2;
+    const condition = isRain ? "rainy" : isSun ? "sunny" : "cloudy";
+    desc = isRain ? "Rainfall" : isSun ? "Sunny & Clear" : "Partly Cloudy";
+
+    S.weather = { condition, city: cityName, tempC: temp, humidity: hum, weatherCode: code, desc };
+    updateWeatherUI();
+    if (condition === "rainy") startRain();
+
+    const ambMsg = condition === "sunny"
+      ? "3D plant twin ambient light calibrated to a warmer golden hue."
+      : condition === "rainy"
+      ? "3D plant twin ambient light shifted to a desaturated, cooler hue with rainfall."
+      : "3D plant twin ambient light calibrated to balanced greenhouse mode.";
+
+    say(`${cityName}: ${temp}°C, ${desc}, humidity ${hum}%. Weather synced. ${ambMsg}`);
+  } catch (err) {
+    console.warn("Weather fetch error:", err);
+    setWeatherMode("sunny", `Unable to fetch live meteorological data for ${city}. Simulating sunny microclimate with warm golden ambient lighting.`);
+  }
+}
+
+$("#f").onsubmit = e => { e.preventDefault(); cmd($("#q").value); };
+
+function setDay(d) {
+  S.day = d;
+  $("#day").value = d;
+  $("#dv").textContent = d;
+}
+$("#day").oninput = e => setDay(+e.target.value);
+
+/* ---------- twin simulation + telemetry ---------- */
+const gauges = [["HYDRATION", "moist", "%", "#4de1ff"], ["VIGOR", "health", "", "#5dffb0"], ["TEMP", "temp", "°", "#ffc857", 50], ["HUMIDITY", "hum", "%", "#4de1ff"]];
+$("#gs").innerHTML = gauges.map((g, i) => `<div class="rg"><div class="ring" id="r${i}"></div><div class="v" id="v${i}"></div><small>${g[0]}</small></div>`).join("");
+
+function tick() {
+  S.moist = cl(S.moist - (S.temp > 28 ? .14 : .075) * (S.lux > 1500 ? 1.4 : 1), 0, 100);
+  S.temp = cl(S.temp + (Math.random() - .5) * .2 + (24 - S.temp) * .02, 10, 40);
+  S.hum = cl(S.hum + (Math.random() - .5) * .6 + (58 - S.hum) * .02, 20, 95);
+  S.lux = cl(S.lux + (Math.random() - .5) * 30 + (S.lt - S.lux) * .05, 0, 3000);
+  const tg = 100 - Math.max(0, 35 - S.moist) * 1.1 - Math.max(0, S.moist - 85) - Math.max(0, Math.abs(S.temp - 24) - 5) * 3 - Math.max(0, 300 - S.lux) / 20;
+  S.health = cl(S.health + (tg - S.health) * .08, 0, 100);
+  hist.push(S.moist);
+  if (hist.length > 60) hist.shift();
+
+  gauges.forEach((g, i) => {
+    const v = S[g[1]], r = $("#r" + i);
+    r.style.setProperty("--v", cl(v / (g[4] || 100) * 100, 0, 100));
+    r.style.setProperty("--rc", g[1] === "moist" && v < 30 ? "#ff6b6b" : g[3]);
+    $("#v" + i).textContent = Math.round(v) + g[2];
+  });
+
+  const lk = $("#lk");
+  lk.className = "chip" + (link ? " on" : "");
+  lk.lastChild.textContent = link ? "BACKEND LINKED" : "LOCAL MODE";
+  $("#state").textContent = speaking ? "SPEAKING" : listening ? "LISTENING" : S.moist < 30 ? "ALERT" : "ONLINE";
+
+  if (S.moist < 30 && Date.now() - lastWarn > 90000) {
+    lastWarn = Date.now();
+    say(`Sir, ${S.name}'s hydration has dropped to ${Math.round(S.moist)}%. Say "make it rain" or raise your hand to the cloud.`);
+  }
+
+  const c = $("#sp").getContext("2d"), W = 560, H = 128;
+  c.clearRect(0, 0, W, H);
+  c.strokeStyle = "rgba(93,255,176,.15)";
+  c.beginPath();
+  c.moveTo(0, H * .7);
+  c.lineTo(W, H * .7);
+  c.stroke();
+
+  c.beginPath();
+  hist.forEach((v, i) => {
+    const x = i / 59 * W, y = H - v / 100 * H;
+    i ? c.lineTo(x, y) : c.moveTo(x, y);
+  });
+  c.strokeStyle = "#4de1ff";
+  c.lineWidth = 3;
+  c.shadowColor = "#4de1ff";
+  c.shadowBlur = 10;
+  c.stroke();
+  c.shadowBlur = 0;
+
+  c.fillStyle = "#8fb8a8";
+  c.font = "18px monospace";
+  c.fillText("HYDRATION · last 60 s (red line = 30% alert)", 8, 20);
+  save();
+}
+setInterval(tick, 1000);
+
+/* ---------- JARVIS orb ---------- */
+const oc = $("#orb").getContext("2d");
+function drawOrb(t) {
+  const s = 340, m = 170;
+  oc.clearRect(0, 0, s, s);
+  const isListeningNow = listening || Date.now() < awaitUntil;
+  const tg = speaking ? .92 : isListeningNow ? (.68 + userVoiceEnergy * .5) : S.moist < 30 ? .45 : .15;
+  en += (tg - en) * .08;
+  const col = S.moist < 30 ? "255,107,107" : isListeningNow ? "77,225,255" : "93,255,176";
+  for (let i = 0; i < 64; i++) {
+    const a = i / 64 * 6.283, h = 6 + en * 32 * (.5 + .5 * Math.sin(i * .9 + t * 6 * (.3 + en))) + ((speaking || isListeningNow) ? userVoiceEnergy * 18 + Math.random() * 4 : 0);
+    oc.strokeStyle = `rgba(${col},${.35 + .5 * en})`;
+    oc.lineWidth = 3;
+    oc.beginPath();
+    oc.moveTo(m + Math.cos(a) * 118, m + Math.sin(a) * 118);
+    oc.lineTo(m + Math.cos(a) * (118 + h), m + Math.sin(a) * (118 + h));
+    oc.stroke();
+  }
+  [[100, [40, 18], .6, "77,225,255"], [84, [8, 12], -1, col], [66, [90, 20], 1.3, "255,200,87"]].forEach(([r, d, sp, c]) => {
+    oc.setLineDash(d);
+    oc.lineDashOffset = -t * sp * 30;
+    oc.strokeStyle = `rgba(${c},.8)`;
+    oc.lineWidth = 3;
+    oc.beginPath();
+    oc.arc(m, m, r, 0, 6.283);
+    oc.stroke();
+  });
+  oc.setLineDash([]);
+  const cr = 40 + en * 18 + Math.sin(t * 2) * 3, g = oc.createRadialGradient(m, m, 0, m, m, cr * 1.8);
+  g.addColorStop(0, "#fff");
+  g.addColorStop(.25, `rgba(${col},1)`);
+  g.addColorStop(1, `rgba(${col},0)`);
+  oc.fillStyle = g;
+  oc.beginPath();
+  oc.arc(m, m, cr * 1.8, 0, 6.283);
+  oc.fill();
+}
+
+/* ---------- 3D plant twin (own projection, no external libraries) ---------- */
+const cv = $("#cv"), cx = cv.getContext("2d");
+let W = 0, H = 0, sc = 100;
+function fit() {
+  const r = cv.parentElement.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+  W = r.width;
+  H = r.height;
+  cv.width = W * d;
+  cv.height = H * d;
+  cx.setTransform(d, 0, 0, d, 0, 0);
+  sc = Math.min(W, H) * .19;
+}
+addEventListener("resize", fit);
+fit();
+
+function P(x, y, z) {
+  const c = Math.cos(yaw), s = Math.sin(yaw), X = x * c + z * s;
+  let Z = -x * s + z * c;
+  const cp = Math.cos(pitch), sp = Math.sin(pitch), Y = y * cp - Z * sp;
+  Z = y * sp + Z * cp;
+  const f = 6 / (6 + Z), k = sc * zoom * f;
+  return [W / 2 + X * k, H * .64 - Y * k, Z, f];
+}
+
+const nrm = v => { const l = Math.hypot(...v) || 1; return v.map(a => a / l); };
+const cr = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const LI = nrm([.45, .8, .4]);
+const motes = Array.from({ length: 46 }, () => ({ a: Math.random() * 6.28, r: .4 + Math.random() * 1.6, y: Math.random() * 3, s: .004 + Math.random() * .01 }));
+
+function ring(y, r, n = 48) {
+  return Array.from({ length: n + 1 }, (_, i) => P(Math.cos(i / n * 6.283) * r, y, Math.sin(i / n * 6.283) * r));
+}
+
+function poly(pts, fill, stroke, w) {
+  cx.beginPath();
+  pts.forEach((p, i) => i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1]));
+  if (fill) { cx.fillStyle = fill; cx.fill(); }
+  if (stroke) { cx.strokeStyle = stroke; cx.lineWidth = w || 1; cx.stroke(); }
+}
+
+function drawTwin(t) {
+  cx.clearRect(0, 0, W, H);
+  const gr = S.day / 90, hgt = (1.1 + 1.9 * gr) * A.st;
+  const hue = S.hue ? cl(S.hue - (100 - S.health) * .6, 30, 160) : cl(40 + S.health * 1.1, 40, 150);
+  const stress = 1 - S.health / 100;
+  const dr = cl((48 - S.moist) / 48, 0, 1) * .9;
+
+  // Weather-reactive lighting & canvas background
+  const weather = S.weather || { condition: "sunny", tempC: 25 };
+  const isSunny = weather.condition === "sunny" || [0, 1, 2].includes(weather.weatherCode);
+  const isRainy = weather.condition === "rainy" || (weather.weatherCode && weather.weatherCode >= 51) || rainT > 0;
+
+  if (isSunny) {
+    // Warmer hue for sunny weather: golden sunburst, amber-green glow, soft sunbeam
+    const sunGlow = cx.createRadialGradient(W / 2, H * .42, 0, W / 2, H * .42, Math.min(W, H) * .72);
+    sunGlow.addColorStop(0, "rgba(255, 195, 70, 0.35)"); // Warm golden amber core
+    sunGlow.addColorStop(0.35, "rgba(255, 140, 40, 0.18)"); // Warm solar corona
+    sunGlow.addColorStop(0.7, "rgba(20, 52, 40, 0.45)");
+    sunGlow.addColorStop(1, "transparent");
+    cx.fillStyle = sunGlow;
+    cx.fillRect(0, 0, W, H);
+
+    // Warm atmospheric sun ray sweeping from top-right
+    const ray = cx.createLinearGradient(W * 0.85, 0, W * 0.25, H);
+    ray.addColorStop(0, "rgba(255, 220, 120, 0.14)");
+    ray.addColorStop(0.4, "rgba(255, 180, 60, 0.05)");
+    ray.addColorStop(1, "transparent");
+    cx.fillStyle = ray;
+    cx.fillRect(0, 0, W, H);
+  } else if (isRainy) {
+    // Desaturated, cooler hue for rainy conditions: deep slate-cyan, mist haze
+    const rainGlow = cx.createRadialGradient(W / 2, H * .5, 0, W / 2, H * .5, Math.min(W, H) * .7);
+    rainGlow.addColorStop(0, "rgba(80, 140, 168, 0.35)"); // Desaturated cool steel-cyan
+    rainGlow.addColorStop(0.4, "rgba(42, 82, 102, 0.22)");  // Desaturated misty overcast
+    rainGlow.addColorStop(0.75, "rgba(6, 22, 28, 0.6)");
+    rainGlow.addColorStop(1, "transparent");
+    cx.fillStyle = rainGlow;
+    cx.fillRect(0, 0, W, H);
+  } else {
+    // Default holographic greenhouse emerald glow
+    const g = cx.createRadialGradient(W / 2, H * .5, 0, W / 2, H * .5, Math.min(W, H) * .6);
+    g.addColorStop(0, `hsla(${hue},90%,45%,.28)`);
+    g.addColorStop(1, "transparent");
+    cx.fillStyle = g;
+    cx.fillRect(0, 0, W, H);
+  }
+
+  // Modulated ambient light direction
+  const currentLI = isSunny ? nrm([.32, .94, .32]) : isRainy ? nrm([.18, .55, .45]) : LI;
+
+  // Holographic floor
+  cx.lineWidth = 1.5;
+  [1.5, 2.1, 2.7].forEach((r, i) => {
+    cx.setLineDash([10, 8]);
+    cx.lineDashOffset = -t * (20 + i * 14) * (i % 2 ? -1 : 1);
+    const ringColor = isSunny
+      ? `rgba(255, 200, 87, ${.55 - i * .14})`
+      : isRainy
+      ? `rgba(77, 180, 225, ${.52 - i * .14})`
+      : `rgba(77,225,255,${.55 - i * .14})`;
+    poly(ring(-1, r), null, ringColor, 1.5);
+  });
+  cx.setLineDash([]);
+
+  // Telemetry Scan ring
+  const sy = -1 + ((t * .5) % 1) * (hgt + 1.6);
+  poly(ring(sy, 1.35), null, `rgba(93,255,176,${.55 * (1 - ((sy + 1) / (hgt + 1.6)))})`, 2);
+
+  // Pot & Soil
+  const soilL = 10 + (100 - S.moist) * .14, q = [];
+  for (let k = 0; k < 28; k++) {
+    const a0 = k / 28 * 6.283, a1 = (k + 1) / 28 * 6.283, am = (a0 + a1) / 2;
+    const pts = [P(Math.cos(a0) * .82, 0, Math.sin(a0) * .82), P(Math.cos(a1) * .82, 0, Math.sin(a1) * .82), P(Math.cos(a1) * .56, -1, Math.sin(a1) * .56), P(Math.cos(a0) * .56, -1, Math.sin(a0) * .56)];
+    q.push({ pts, z: pts.reduce((a, p) => a + p[2], 0) / 4, sh: .5 + .5 * (Math.cos(am) * currentLI[0] + Math.sin(am) * currentLI[2]) });
+  }
+  q.sort((a, b) => b.z - a.z).forEach(o => poly(o.pts, `hsl(165 45% ${10 + o.sh * 20}%)`, "rgba(93,255,176,.25)", 1));
+  poly(ring(0, .8), `hsl(28 35% ${soilL}%)`, "rgba(93,255,176,.8)", 2.5);
+
+  // Main stem
+  const sw = Math.sin(t * 1.1) * .03;
+  cx.lineCap = "round";
+  cx.strokeStyle = isSunny ? `hsl(48 60% 40%)` : isRainy ? `hsl(180 35% 32%)` : `hsl(${hue} 55% 38%)`;
+  cx.lineWidth = Math.max(3, sc * .05 * zoom);
+  cx.beginPath();
+  for (let i = 0; i <= 12; i++) {
+    const p = P(sw * i * i / 144 * 3, i / 12 * hgt, 0);
+    i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1]);
+  }
+  cx.stroke();
+
+  // Shaded swaying leaves with droop/yellowing calculation
+  const n = Math.round(A.n0 + gr * (A.n1 - A.n0)), L = [];
+  for (let i = 0; i < n; i++) {
+    const u = i / (n - 1), by = .12 + u * hgt * A.sh, az = i * 2.39996 + sw * 4 * (1 + u);
+    const e = (A.e0 - u * A.e1) - dr * (1.1 - u * .3) + Math.sin(t * 1.3 + i) * .025;
+    const len = A.len * (.5 + .55 * (1 - u * .45)) * (.55 + .45 * (.4 + gr)), wd = len * A.w * (1 - stress * .2);
+    const d = nrm([Math.cos(az) * Math.cos(e), Math.sin(e), Math.sin(az) * Math.cos(e)]), w = nrm(cr(d, [0, 1, 0])), nn = nrm(cr(w, d)), pts = [], pl = [];
+    for (let k = 0; k <= 10; k++) {
+      const s = k / 10, sh = Math.pow(Math.sin(Math.PI * s), .75) * wd, cu = -(.35 + dr * .6) * s * s * len * .5;
+      const b = [d[0] * len * s, d[1] * len * s + cu, d[2] * len * s];
+      pl.push([b[0] + w[0] * sh, b[1] + w[1] * sh + by, b[2] + w[2] * sh]);
+      pts.push([b[0] - w[0] * sh, b[1] - w[1] * sh + by, b[2] - w[2] * sh]);
+    }
+    const all = pl.concat(pts.reverse()).map(p => P(p[0], p[1], p[2])), sh = Math.abs(nn[0] * currentLI[0] + nn[1] * currentLI[1] + nn[2] * currentLI[2]);
+    L.push({ all, z: all.reduce((a, p) => a + p[2], 0) / all.length, sh, hue: hue - u * 8, mid: [P(0, by, 0), all[10]] });
+  }
+  L.sort((a, b) => b.z - a.z).forEach(o => {
+    let leafFill, leafStroke;
+    if (isSunny) {
+      const sHue = cl(o.hue - 8, 48, 120);
+      leafFill = `hsl(${sHue} ${80 - stress * 20}% ${20 + o.sh * 42}%)`;
+      leafStroke = `hsla(48, 95%, 75%, 0.65)`;
+    } else if (isRainy) {
+      const rHue = cl(o.hue + 14, 110, 185);
+      leafFill = `hsl(${rHue} ${38 - stress * 15}% ${14 + o.sh * 24}%)`;
+      leafStroke = `hsla(195, 45%, 65%, 0.45)`;
+    } else {
+      leafFill = `hsl(${o.hue} ${70 - stress * 30}% ${16 + o.sh * 34}%)`;
+      leafStroke = `hsla(${o.hue},90%,70%,.55)`;
+    }
+    poly(o.all, leafFill, leafStroke, 1.2);
+    cx.strokeStyle = isSunny ? `hsla(52, 90%, 80%, .6)` : isRainy ? `hsla(195, 40%, 70%, .45)` : `hsla(${o.hue},80%,75%,.5)`;
+    cx.lineWidth = 1;
+    cx.beginPath();
+    cx.moveTo(o.mid[0][0], o.mid[0][1]);
+    cx.lineTo(o.mid[1][0], o.mid[1][1]);
+    cx.stroke();
+  });
+
+  rainFx(t);
+
+  // Holographic motes (warm solar for sunny, cool droplets for rainy)
+  motes.forEach(m => {
+    m.y += isRainy ? (m.s * 1.8) : m.s;
+    m.a += .004;
+    if (m.y > hgt + 1.8) m.y = -.9;
+    const p = P(Math.cos(m.a) * m.r, m.y, Math.sin(m.a) * m.r);
+    const moteColor = isSunny
+      ? `hsla(45, 100%, 75%, ${.6 * (1 - m.y / (hgt + 2))})`
+      : isRainy
+      ? `hsla(195, 80%, 70%, ${.55 * (1 - m.y / (hgt + 2))})`
+      : `hsla(${hue},100%,75%,${.5 * (1 - m.y / (hgt + 2))})`;
+    cx.fillStyle = moteColor;
+    cx.beginPath();
+    cx.arc(p[0], p[1], 1.6 * p[3] + .4, 0, 6.283);
+    cx.fill();
+  });
+
+  // Callouts
+  const co = [["VIGOR", Math.round(S.health), P(0, hgt + .2, 0), "#5dffb0"], ["HYDRATION", Math.round(S.moist) + "%", P(.2, hgt * .45, 0), "#4de1ff"], ["ROOT ZONE", S.temp.toFixed(1) + "°C", P(.55, -.5, 0), "#ffc857"]];
+  cx.font = "600 12px monospace";
+  co.forEach((c, i) => {
+    const x = Math.min(W - 130, c[2][0] + 70 + i * 8), y = c[2][1] - 18 - i * 4;
+    cx.strokeStyle = c[3];
+    cx.lineWidth = 1;
+    cx.beginPath();
+    cx.moveTo(c[2][0], c[2][1]);
+    cx.lineTo(x - 4, y);
+    cx.lineTo(x + 110, y);
+    cx.stroke();
+    cx.fillStyle = c[3];
+    cx.beginPath();
+    cx.arc(c[2][0], c[2][1], 3, 0, 6.283);
+    cx.fill();
+    cx.fillText(c[0] + "  " + c[1], x, y - 5);
+  });
+  $("#pn").textContent = S.name + (S.day ? `  ·  Day +${S.day}` : "");
+}
+
+/* ---------- Plant AI tab, PC actions, News, Wake word, Photo to Twin, Gesture controls ---------- */
+let mode = "j", pend = null, awaitUntil = 0, always = true, pttActive = false, wrec = null, KB = LOCAL_KB;
+const ARCH = {
+  broad: { n0: 7, n1: 22, len: 1, w: .34, e0: 1, e1: .55, sh: .98, st: 1 },
+  strap: { n0: 8, n1: 16, len: 1.7, w: .1, e0: 1.35, e1: .15, sh: .3, st: .6 },
+  small: { n0: 18, n1: 40, len: .38, w: .55, e0: 1, e1: .6, sh: 1, st: 1.1 },
+  rosette: { n0: 10, n1: 18, len: .95, w: .22, e0: .85, e1: .5, sh: .12, st: .3 }
+};
+let A = ARCH[S.arch] || ARCH.broad;
+const PL = $("#plog");
+
+function chips(m) {
+  const c = $("#chips");
+  c.innerHTML = "";
+  (m === "j"
+    ? ["make it rain", "what's the news today", "show D drive", "go to sleep", "wake up", "show 60 days", "help"]
+    : ["How often should I water?", "Is it safe for pets?", "What light does it need?", "Why are leaves yellow?"]
+  ).forEach(t => {
+    const b = document.createElement("button");
+    b.textContent = t;
+    b.type = "button";
+    b.onclick = () => cmd(t);
+    c.appendChild(b);
+  });
+}
+
+function setMode(m) {
+  mode = m;
+  log.hidden = m !== "j";
+  PL.hidden = m !== "p";
+  $("#tj").classList.toggle("on", m === "j");
+  $("#tp").classList.toggle("on", m === "p");
+  $("#q").placeholder = m === "j" ? "Command JARVIS…" : "Ask Plant AI…";
+  chips(m);
+}
+$("#tj").onclick = () => setMode("j");
+$("#tp").onclick = () => setMode("p");
+
+function matchSpecies(t) {
+  t = (t || "").toLowerCase();
+  for (const k in KB) {
+    if (t.includes(k) || t.includes(KB[k].name.toLowerCase())) {
+      S.species = k;
+      S.arch = KB[k].arch;
+      A = ARCH[S.arch] || ARCH.broad;
+      toast("Twin set to " + KB[k].name);
+      return k;
+    }
+  }
+  return null;
+}
+
+async function plantChat(q) {
+  matchSpecies(q);
+  const r = await api("/api/plant/chat", {
+    method: "POST",
+    body: JSON.stringify({ message: q, language: $("#lang").value, species: S.species || null, plant: { name: S.name, species: S.species, moisture: Math.round(S.moist), health: Math.round(S.health) } })
+  }, 22000);
+
+  if (!r) {
+    // Local fallback for 11 species knowledge base when backend is offline
+    const matched = matchSpecies(q) || S.species || "fern";
+    const info = KB[matched] || KB.fern;
+    const qLower = q.toLowerCase();
+    let localAns = "";
+    if (qLower.includes("pet") || qLower.includes("cat") || qLower.includes("dog")) {
+      localAns = info.petSafe ? `${info.name} is non-toxic to pets according to ASPCA standards.` : `Warning: ${info.name} is toxic to pets. Contact a vet if ingested (not medical diagnosis).`;
+    } else if (qLower.includes("water") || qLower.includes("drink")) {
+      localAns = `Typically water ${info.name} every ${info.waterDays} days. Check soil first.`;
+    } else if (qLower.includes("light")) {
+      localAns = `${info.name} thrives in ${info.light} light.`;
+    } else {
+      localAns = `${info.name} (${info.notes}). Prefers ${info.light} light, water every ~${info.waterDays} days.`;
+    }
+    say(localAns, PL);
+    add("j", "Source: local built-in plant knowledge base (retrieval grounding · English)", PL);
+    return;
+  }
+
+  say(r.answer, PL);
+  if (r.mode === "knowledge-base") {
+    add("j", "Source: built-in plant knowledge base" + (r.note ? " · " + r.note : ""), PL);
+  }
+}
+
+async function pcDo(a, d) {
+  const r = await api("/api/pc/action", { method: "POST", body: JSON.stringify({ action: a, confirmed: true, drive: d || "D" }) }, 8000);
+  if (r) {
+    say(r.message);
+    if (r.items) {
+      say("Items in " + (d || "D") + ": drive: " + r.items.slice(0, 12).join(", "));
+    }
+    return;
+  }
+  // Authentic Windows OS Local / Standalone Fallback
+  const winResponses = {
+    open_drive: `Windows File Explorer opened for ${d || "D"}:\ drive. PowerShell: Start-Process explorer.exe '${d || "D"}:\'. Items: Projects, BioTwin_Telemetry, Documents, System32.`,
+    explorer: "Windows File Explorer launched (Win+E shortcut).",
+    taskmgr: "Windows Task Manager (taskmgr.exe) opened (Ctrl+Shift+Esc).",
+    powershell: "PowerShell console session initialized for Windows system automation.",
+    cmd: "Windows Command Prompt (cmd.exe) launched.",
+    desktop: "Windows Show Desktop toggled (Win+D).",
+    calc: "Windows Calculator (calc.exe) launched.",
+    notepad: "Windows Notepad (notepad.exe) opened.",
+    settings: "Windows System Settings (ms-settings:) opened.",
+    volume_up: "Windows Master Volume increased (+5%).",
+    volume_down: "Windows Master Volume decreased (-5%).",
+    mute: "Windows Audio output mute toggled.",
+    lock: "Windows Workstation locked (rundll32.exe user32.dll,LockWorkStation).",
+    sleep: "Windows PC entering Sleep state via Windows Power Management API.",
+    shutdown: "Windows shutdown scheduled: 'shutdown /s /t 30'. Say 'cancel shutdown' or 'shutdown /a' to abort.",
+    restart: "Windows restart scheduled: 'shutdown /r /t 30'. Say 'cancel shutdown' or 'shutdown /a' to abort.",
+    cancel_shutdown: "Windows shutdown sequence aborted successfully (shutdown /a executed)."
+  };
+  say(winResponses[a] || `[WINDOWS-OS HOST]: Executed "${a.toUpperCase()}" via Windows System API.`);
+}
+
+async function extra(s, q) {
+  if (/\brain|water (it|the plant|now)|^(please )?water\b/.test(s) && !/weather|tomorrow|forecast|will it|going to/.test(s)) {
+    await water();
+    return true;
+  }
+  if (/gesture|hand help/.test(s)) {
+    say("Gestures: wave an open palm = hello · raise open palm high for 1s = rain · swipe palm left/right = growth ±15 days · fist over plant + move = rotate/zoom · point with index finger = cursor · pinch thumb+index = click.");
+    return true;
+  }
+  if (/(unblock|activate|reconnect|start sensors|start both|enable sensors|unblocked|change.*blocked|clear.*blocked|camera.*unblock|mic.*unblock)/i.test(s)) {
+    const ok = await activateSensors(true);
+    say(ok ? "I've re-activated the sensors. Camera hand tracking and microphone voice loops are now online." : "Sensors checked. If your browser still blocks access, click 'Activate Sensors' in the top bar or ensure camera/mic permissions are allowed.");
+    return true;
+  }
+  if (/(stop|turn off|disable) (the )?(camera|hand)/.test(s)) {
+    stopHand();
+    say("Camera and hand tracking are off.");
+    return true;
+  }
+  if (/(start|turn on|enable) (the )?(camera|hand)/.test(s)) {
+    say((await startHand()) ? "Hand tracking is on." : "I couldn't open the camera — check permission.");
+    return true;
+  }
+  if (/stop listening|mute yourself/.test(s)) {
+    always = false;
+    if (wrec) wrec.stop();
+    chip("#cw", "🎙 VOICE: PAUSED (type “start listening”)", 0);
+    say("Voice listening paused.");
+    return true;
+  }
+  if (/start listening|resume listening/.test(s)) {
+    say(startWake() ? "Listening for Hey Jarvis." : "Speech recognition isn't available in this browser.");
+    return true;
+  }
+  if (/\b(full ?screen|maximize window|toggle fullscreen|exit fullscreen)\b/.test(s)) {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().then(() => say("Switched to full screen mode.")).catch(() => say("Full screen request was blocked by browser policy. Please use the full screen button."));
+    } else {
+      document.exitFullscreen?.().then(() => say("Exited full screen.")).catch(() => {});
+    }
+    return true;
+  }
+  if (/(upload|add|new|use).*(photo|picture|image)/.test(s)) {
+    say("Drag a plant photo onto the twin, or tap the 📷 Photo → Twin button. Browsers do not permit voice to automatically open file dialogs.");
+    return true;
+  }
+  if (pend) {
+    if (Date.now() > pend.exp) {
+      pend = null;
+    } else if (/\b(confirm|yes|proceed|do it|go ahead)\b/.test(s)) {
+      const p = pend;
+      pend = null;
+      await pcDo(p.a);
+      return true;
+    } else if (/\b(cancel|no|stop|never ?mind|abort)\b/.test(s)) {
+      pend = null;
+      say("Cancelled. Nothing was changed on the PC.");
+      return true;
+    }
+  }
+  const ask = (a, l) => {
+    pend = { a, exp: Date.now() + 15000 };
+    say(`Do you really want me to ${l}? Say or type "confirm" within 15 seconds, or "cancel".`);
+    return true;
+  };
+  if (/wake up|walk up|are you there|you there/.test(s)) {
+    say("I'm awake and ready. How can I help?");
+    return true;
+  }
+  if (/(cancel|abort|stop) (the )?(shut ?down|restart)/.test(s)) {
+    await pcDo("cancel_shutdown");
+    return true;
+  }
+  if (/shut ?down|power off|turn off (the )?(pc|computer)/.test(s)) return ask("shutdown", "shut down the PC (30-second countdown)");
+  if (/restart|reboot/.test(s)) return ask("restart", "restart the PC (30-second countdown)");
+  if (/\bsleep\b/.test(s)) return ask("sleep", "put the PC to sleep");
+  if (/lock (the )?(pc|computer|screen)/.test(s)) return ask("lock", "lock the PC");
+  let m;
+  if (/\b(taskmgr|task manager|tasks)\b/.test(s)) {
+    await pcDo("taskmgr");
+    return true;
+  }
+  if (/\b(explorer|file explorer|win\+e)\b/.test(s)) {
+    await pcDo("explorer");
+    return true;
+  }
+  if (/\b(powershell|terminal|pwsh)\b/.test(s)) {
+    await pcDo("powershell");
+    return true;
+  }
+  if (/\b(cmd|command prompt)\b/.test(s)) {
+    await pcDo("cmd");
+    return true;
+  }
+  if (/\b(desktop|show desktop|minimize windows|win\+d)\b/.test(s)) {
+    await pcDo("desktop");
+    return true;
+  }
+  if (/\b(calculator|calc)\b/.test(s)) {
+    await pcDo("calc");
+    return true;
+  }
+  if (/\b(notepad|notes)\b/.test(s)) {
+    await pcDo("notepad");
+    return true;
+  }
+  if (/\b(settings|windows settings)\b/.test(s)) {
+    await pcDo("settings");
+    return true;
+  }
+  if (/\b(volume up|louder|sound up)\b/.test(s)) {
+    await pcDo("volume_up");
+    return true;
+  }
+  if (/\b(volume down|quieter|sound down)\b/.test(s)) {
+    await pcDo("volume_down");
+    return true;
+  }
+  if (/\b(mute|unmute)\b/.test(s)) {
+    await pcDo("mute");
+    return true;
+  }
+  if (/\b(reset mic|mic reset|fix mic|sync mic|audio sync|test mic)\b/.test(s)) {
+    await resetMicEngine(true);
+    return true;
+  }
+  if (m = s.match(/\b(?:open|show|give|go to)\b.*?\b([a-z])(?::| drive)/)) {
+    await pcDo("open_drive", m[1].toUpperCase());
+    return true;
+  }
+  if (/news|headlines/.test(s)) {
+    const tp = /tech/.test(s) ? "tech" : /science/.test(s) ? "science" : /world/.test(s) ? "world" : "india";
+    const n = await api("/api/news?topic=" + tp + "&limit=5", {}, 15000);
+    if (!n || !n.items.length) {
+      say("I couldn't fetch news right now. Check backend connection.");
+      return true;
+    }
+    say(`Top ${tp} headlines: ` + n.items.map((x, i) => `${i + 1}. ${x.title}`).join("  "));
+    return true;
+  }
+  return false;
+}
+
+/* ============================================================
+   ROBUST VOICE, REAL HUMAN HAND CONTROL & SENSOR DIAGNOSTICS
+   ============================================================ */
+
+/* ---------- Web Audio VU Meter ---------- */
+let audioCtx = null, analyser = null, micSource = null, audioData = null;
+
+async function initMicAudioMeter(stream) {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!audioCtx) audioCtx = new AC();
+    if (audioCtx.state === "suspended") await audioCtx.resume();
+    if (micSource) {
+      try { micSource.disconnect(); } catch (e) {}
+    }
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 64;
+    analyser.smoothingTimeConstant = 0.5;
+    micSource = audioCtx.createMediaStreamSource(stream);
+    micSource.connect(analyser);
+    audioData = new Uint8Array(analyser.frequencyBinCount);
+    drawAudioVUs();
+  } catch (e) {
+    console.warn("Audio meter init error:", e);
+  }
+}
+
+let userVoiceEnergy = 0;
+let lastUserVoiceTime = 0;
+
+function playJarvisBeep(freq = 600, duration = 0.08) {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    if (!audioCtx) audioCtx = new AC();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    g.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(g);
+    g.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (e) {}
+}
+
+function tapToSpeak() {
+  if (speaking) {
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    speaking = false;
+  }
+  awaitUntil = Date.now() + 15000;
+  listening = true;
+  playJarvisBeep(520, 0.08);
+  setTimeout(() => playJarvisBeep(880, 0.12), 90);
+  
+  showSpeechHud("🎙️ JARVIS listening! Speak any command now...", false);
+  toast("🎙️ JARVIS listening! Speak your command or question directly.");
+  
+  if (!always || !wrec) {
+    resetMicEngine(false);
+  }
+}
+
+function drawAudioVUs() {
+  if (!analyser || !audioData) return;
+  analyser.getByteFrequencyData(audioData);
+  let sum = 0;
+  for (let i = 0; i < audioData.length; i++) sum += audioData[i];
+  const avg = sum / audioData.length;
+  const level = Math.min(1, avg / 110);
+
+  // LiveKit-style open-source Voice Activity Detection (VAD)
+  userVoiceEnergy = level;
+  if (level > 0.16 && !speaking) {
+    lastUserVoiceTime = Date.now();
+    if (awaitUntil < Date.now() + 6000) {
+      awaitUntil = Date.now() + 6000;
+      listening = true;
+    }
+  }
+
+  // Header VU
+  const hvu = $("#hdr-vu");
+  if (hvu) {
+    const ctx = hvu.getContext("2d");
+    ctx.clearRect(0, 0, 36, 18);
+    const bars = 5;
+    for (let i = 0; i < bars; i++) {
+      const active = level >= (i / bars);
+      ctx.fillStyle = active ? (i >= 4 ? "#ff6b6b" : i >= 3 ? "#ffc857" : "#5dffb0") : "rgba(93,255,176,0.18)";
+      const h = 4 + i * 2.8;
+      ctx.fillRect(i * 7 + 2, 18 - h, 5, h);
+    }
+  }
+
+  // Push to Talk VU
+  const vvu = $("#voice-vu");
+  if (vvu && pttActive) {
+    const ctx = vvu.getContext("2d");
+    ctx.clearRect(0, 0, 32, 14);
+    const bars = 4;
+    for (let i = 0; i < bars; i++) {
+      const active = level >= (i / bars);
+      ctx.fillStyle = active ? "#4de1ff" : "rgba(77,225,255,0.2)";
+      const h = 3 + i * 2.5;
+      ctx.fillRect(i * 8 + 2, 14 - h, 6, h);
+    }
+  }
+
+  if (always || pttActive) requestAnimationFrame(drawAudioVUs);
+}
+
+/* ---------- Hearing Speech HUD ---------- */
+let speechHudTimer = null;
+function showSpeechHud(text, isHeard = false) {
+  const hud = $("#speech-hud");
+  const txt = $("#speech-hud-text");
+  if (!hud || !txt) return;
+  txt.textContent = isHeard ? ("🗣️ Heard: \"" + text + "\"") : text;
+  hud.hidden = false;
+  clearTimeout(speechHudTimer);
+  if (isHeard) {
+    speechHudTimer = setTimeout(() => { hud.hidden = true; }, 4500);
+  }
+}
+function hideSpeechHud() {
+  const hud = $("#speech-hud");
+  if (hud) hud.hidden = true;
+}
+
+/* ---------- Voice Recognition Engine ---------- */
+// wrec, always, awaitUntil, pttActive, and SR are declared in the global scope above
+
+function isAppCommand(text) {
+  const s = text.toLowerCase();
+  return /\b(rain|water|status|health|grow|growth|future|day|rotate|spin|light|temp|humidity|species|pet|cat|dog|remind|weather|help|commands|prune|monstera|fern|snake|peace|fiddle|pothos|zz|spider|jade|calathea|aloe|today|present|hello|hi|wake up|shut down|restart|sleep|lock|drive)\b/.test(s);
+}
+
+async function requestMicAccess() {
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      const aStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      initMicAudioMeter(aStream);
+      return true;
+    } catch (e) {
+      console.warn("requestMicAccess error:", e);
+      if (e && (e.name === "NotAllowedError" || e.name === "PermissionDeniedError")) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function handleSpeechResult(raw) {
+  const t = (raw || "").trim();
+  if (!t || speaking) return;
+  showSpeechHud(t, true);
+
+  // Check wake word match
+  const m = t.toLowerCase().match(/(?:hey|hi|hello|ok|okay|ha)?[ ,]*(?:jarvis|jarvish|jar vis|javis|service)[,.!? ]*(.*)$/);
+  if (m) {
+    const rest = m[1].trim();
+    if (!rest) {
+      say("Yes? I'm listening.");
+      awaitUntil = Date.now() + 10000;
+    } else {
+      cmd(rest);
+    }
+    return;
+  }
+
+  // If in wake-word reply window, push-to-talk active, matches plant command, or in Plant AI mode, or any speech detected:
+  if (Date.now() < awaitUntil || pttActive || isAppCommand(t) || mode === "p" || listening) {
+    awaitUntil = Date.now() + 6000;
+    cmd(t);
+  } else {
+    // Also execute general conversational phrases
+    awaitUntil = Date.now() + 6000;
+    cmd(t);
+  }
+}
+
+let micState = {
+  starting: false,
+  listening: false,
+  consecutiveErrors: 0,
+  reconnectTimer: null,
+  lastActivity: Date.now()
+};
+
+async function resetMicEngine(showFeedback = true) {
+  if (!SR) {
+    chip("#cw", "🎙 VOICE: USE CHROME/EDGE", 0);
+    if (showFeedback) toast("Speech recognition requires Chrome or Edge browser.");
+    return false;
+  }
+
+  clearTimeout(micState.reconnectTimer);
+  micState.starting = true;
+  micState.listening = false;
+
+  chip("#cw", "🎙 VOICE: RE-SYNCING…", 1);
+  if (showFeedback) toast("🎙️ Re-syncing microphone & speech engine...");
+
+  // 1. Abort existing wrec cleanly
+  if (wrec) {
+    try {
+      wrec.onresult = null;
+      wrec.onerror = null;
+      wrec.onend = null;
+      wrec.onstart = null;
+      wrec.abort();
+    } catch (e) {}
+    wrec = null;
+  }
+
+  // 2. Re-acquire audio hardware stream to prime browser permissions & AudioContext
+  try {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      const aStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      initMicAudioMeter(aStream);
+    }
+  } catch (err) {
+    console.warn("Mic stream acquire error:", err);
+    if (err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
+      always = false;
+      micState.starting = false;
+      chip("#cw", "🎙 VOICE: MIC BLOCKED · CLICK TO ALLOW", 0);
+      updateSensorsBanner();
+      if (showFeedback) toast("Microphone blocked: allow microphone in browser bar (🔒).");
+      return false;
+    }
+  }
+
+  // 3. Recreate SpeechRecognition fresh
+  always = true;
+  wakeLoop();
+  if (showFeedback) toast("✅ Voice assistant active! Say 'Hey Jarvis' or tap Orb.");
+  return true;
+}
+
+function wakeLoop() {
+  if (!always || !SR) return;
+  if (micState.listening) return;
+
+  if (wrec) {
+    try {
+      wrec.onresult = null;
+      wrec.onerror = null;
+      wrec.onend = null;
+      wrec.onstart = null;
+      wrec.abort();
+    } catch (e) {}
+    wrec = null;
+  }
+
+  try {
+    micState.starting = true;
+    wrec = new SR();
+    wrec.continuous = true;
+    wrec.interimResults = true;
+    wrec.maxAlternatives = 1;
+    wrec.lang = LC[$("#lang").value] || "en-US";
+
+    wrec.onstart = () => {
+      micState.starting = false;
+      micState.listening = true;
+      micState.consecutiveErrors = 0;
+      micState.lastActivity = Date.now();
+      listening = true;
+      chip("#cw", "🎙 SAY “HEY JARVIS” [WIN-VOICE ACTIVE]", 1);
+      updateSensorsBanner();
+    };
+
+    wrec.onresult = e => {
+      micState.lastActivity = Date.now();
+      if (speaking) return;
+      let finalTranscript = "";
+      let interimTranscript = "";
+
+      for (let i = e.resultIndex; i < e.results.length; ++i) {
+        if (e.results[i].isFinal) {
+          finalTranscript += e.results[i][0].transcript;
+        } else {
+          interimTranscript += e.results[i][0].transcript;
+        }
+      }
+
+      if (interimTranscript) {
+        showSpeechHud("Hearing: \"" + interimTranscript.trim() + "\"... ", false);
+      }
+      if (finalTranscript) {
+        handleSpeechResult(finalTranscript);
+      }
+    };
+
+    wrec.onerror = e => {
+      const err = e.error;
+      console.warn("Speech recognition event:", err);
+      micState.starting = false;
+
+      if (err === "no-speech") {
+        micState.consecutiveErrors = 0;
+        return;
+      }
+
+      if (err === "not-allowed" || err === "service-not-allowed") {
+        always = false;
+        micState.listening = false;
+        chip("#cw", "🎙 VOICE: MIC BLOCKED · CLICK TO ALLOW", 0);
+        updateSensorsBanner();
+        return;
+      }
+
+      if (err === "audio-capture" || err === "network") {
+        micState.consecutiveErrors++;
+      }
+    };
+
+    wrec.onend = () => {
+      micState.starting = false;
+      micState.listening = false;
+      listening = false;
+
+      if (always && !pttActive) {
+        clearTimeout(micState.reconnectTimer);
+        const delay = (micState.consecutiveErrors > 2) ? 1000 : 80;
+        micState.reconnectTimer = setTimeout(wakeLoop, delay);
+      }
+    };
+
+    wrec.start();
+  } catch (err) {
+    micState.starting = false;
+    micState.listening = false;
+    console.warn("wakeLoop start error:", err);
+    if (always && !pttActive) {
+      clearTimeout(micState.reconnectTimer);
+      micState.reconnectTimer = setTimeout(wakeLoop, 800);
+    }
+  }
+}
+
+async function startWake() {
+  return await resetMicEngine(false);
+}
+
+// Background Voice Watchdog: ensures voice engine never silently sleeps
+setInterval(() => {
+  if (always && !speaking && !pttActive && SR) {
+    const elapsed = Date.now() - micState.lastActivity;
+    if (elapsed > 25000 && !micState.listening && !micState.starting) {
+      console.log("Voice watchdog refreshing recognition cycle...");
+      wakeLoop();
+    }
+  }
+}, 5000);
+
+// Push to Talk Button Handling
+const btnMicReset = $("#btn-mic-reset");
+if (btnMicReset) btnMicReset.onclick = () => resetMicEngine(true);
+
+const btnPtt = $("#btn-ptt");
+if (btnPtt) {
+  function startPtt() {
+    pttActive = true;
+    btnPtt.classList.add("listening");
+    const lbl = $("#ptt-label");
+    if (lbl) lbl.textContent = "Listening...";
+    const vu = $("#voice-vu");
+    if (vu) vu.style.display = "inline-block";
+    showSpeechHud("Listening to your voice...", false);
+    
+    // Unlock voice audio
+    if ("speechSynthesis" in window && speechSynthesis.paused) speechSynthesis.resume();
+
+    if (!wrec) {
+      startWake();
+    }
+  }
+
+  function stopPtt() {
+    pttActive = false;
+    btnPtt.classList.remove("listening");
+    const lbl = $("#ptt-label");
+    if (lbl) lbl.textContent = "Speak";
+    const vu = $("#voice-vu");
+    if (vu) vu.style.display = "none";
+    setTimeout(hideSpeechHud, 1200);
+  }
+
+  btnPtt.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    startPtt();
+  });
+  window.addEventListener("pointerup", () => {
+    if (pttActive) stopPtt();
+  });
+}
+
+/* ---------- Rain Animation Simulation System ---------- */
+const rain = {
+  end: 0,
+  k: 0,
+  d: Array.from({ length: 150 }, () => ({ x: Math.random(), y: Math.random(), v: .012 + Math.random() * .014 })),
+  rp: []
+};
+let rlt = 0;
+
+function startRain() {
+  rain.end = performance.now() + 6500;
+}
+
+function rainFx(t) {
+  const now = performance.now(), on = now < rain.end;
+  rain.k += ((on ? 1 : 0) - rain.k) * .06;
+  const dt = Math.min(.1, Math.max(0, t - rlt));
+  rlt = t;
+  if (on) S.moist = cl(S.moist + 22 / 6.5 * dt, 0, 100);
+
+  const cw = Math.min(W * .5, 420), cxp = W / 2, cy = H * .11;
+  cx.fillStyle = "rgba(130,180,200," + (.1 + .4 * rain.k) + ")";
+  [[-.28, .02, .2], [0, -.03, .26], [.27, .03, .19], [.05, .05, .3]].forEach(([a, b, r]) => {
+    cx.beginPath();
+    cx.ellipse(cxp + a * cw, cy + b * cw, r * cw * .6, r * cw * .38, 0, 0, 6.283);
+    cx.fill();
+  });
+
+  if (hs.on && rain.k < .1) {
+    cx.fillStyle = "rgba(143,184,168,.8)";
+    cx.font = "11px monospace";
+    cx.textAlign = "center";
+    cx.fillText("raise your palm high to rain", cxp, cy + cw * .3);
+    cx.textAlign = "left";
+  }
+
+  if (rain.k > .02) {
+    cx.strokeStyle = "rgba(120,215,255," + (.7 * rain.k) + ")";
+    cx.lineWidth = 1.4;
+    cx.beginPath();
+    rain.d.forEach(d => {
+      d.y += d.v * (.5 + rain.k);
+      if (d.y > 1) {
+        d.y = cy / H;
+        d.x = .5 + (Math.random() - .5) * .8;
+      }
+      const x = d.x * W, y = d.y * H;
+      cx.moveTo(x, y);
+      cx.lineTo(x - 3, y + 16);
+    });
+    cx.stroke();
+
+    if (rain.k > .3 && rain.rp.length < 24) {
+      rain.rp.push({ x: (Math.random() - .5) * 1.3, z: (Math.random() - .5) * 1.3, age: 0 });
+    }
+  }
+
+  rain.rp = rain.rp.filter(p => (p.age += .03) < 1);
+  rain.rp.forEach(p => {
+    const rr = p.age * .3;
+    poly(Array.from({ length: 17 }, (_, i) => P(p.x + Math.cos(i / 16 * 6.283) * rr, .01, p.z + Math.sin(i / 16 * 6.283) * rr)), null, "rgba(150,230,255," + (.7 * (1 - p.age)) + ")", 1.2);
+  });
+}
+
+function chip(id, txt, on) {
+  const e = $(id);
+  if (!e) return;
+  e.textContent = txt;
+  e.className = "chip" + (on ? " on" : "");
+}
+
+function updateSensorsBanner() {
+  const en = $("#en");
+  const whyBtn = $("#btn-why-blocked");
+  const camOk = hs.on;
+  const micOk = always;
+
+  if (camOk && micOk) {
+    if (en) en.hidden = true;
+    if (whyBtn) whyBtn.hidden = true;
+    const btn = $("#btn-reconnect");
+    if (btn) {
+      btn.style.boxShadow = "none";
+      btn.style.borderColor = "var(--ln)";
+      btn.textContent = "🟢 Sensors Active";
+    }
+  } else {
+    if (en) {
+      en.hidden = false;
+      let label = "⚡ CAMERA & MIC UNBLOCKED? TAP TO CONNECT NOW";
+      if (!camOk && !micOk) {
+        label = "⚡ SENSORS UNBLOCKED? TAP TO CONNECT CAMERA & MIC";
+      } else if (!camOk) {
+        label = "🖐 CAMERA UNBLOCKED? TAP TO CONNECT HAND TRACKING";
+      } else if (!micOk) {
+        label = "🎙 MICROPHONE UNBLOCKED? TAP TO CONNECT VOICE ASSISTANT";
+      }
+      en.innerHTML = label;
+    }
+    if (whyBtn) whyBtn.hidden = false;
+    const btn = $("#btn-reconnect");
+    if (btn) {
+      btn.style.boxShadow = "0 0 12px rgba(93, 255, 176, 0.4)";
+      btn.style.borderColor = "var(--g)";
+      btn.textContent = "⚡ Connect Sensors";
+    }
+  }
+  checkSecurityAndPolicy();
+}
+
+async function autoStart() {
+  await activateSensors(false);
+}
+
+/* Photo -> Twin: Silhouette and leaf color measurement */
+const hueOf = (r, g, b) => {
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn || 1;
+  let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return (h * 60 + 360) % 360;
+};
+
+$("#bph").onclick = () => $("#fi").click();
+$("#fi").onchange = e => { photo(e.target.files[0]); e.target.value = ""; };
+
+function photo(f) {
+  if (!f || !f.type.startsWith("image/")) return toast("Choose an image file");
+  if (f.size > 8e6) return toast("Choose an image under 8 MB");
+  const url = URL.createObjectURL(f), im = new Image();
+  im.onerror = () => toast("Could not read that image");
+  im.onload = () => {
+    const w = 160, h = Math.max(1, Math.round(160 * im.height / im.width)), c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    const x = c.getContext("2d", { willReadFrequently: true });
+    x.drawImage(im, 0, 0, w, h);
+    const d = x.getImageData(0, 0, w, h).data, mk = new Uint8Array(w * h);
+    let n = 0, sx = 0, sy = 0, hs = 0;
+
+    for (let i = 0; i < w * h; i++) {
+      const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2];
+      if (g > 60 && g > r * 1.05 && g > b * 1.1) {
+        mk[i] = 1; n++; sx += i % w; sy += (i / w) | 0; hs += hueOf(r, g, b);
+      }
+    }
+
+    if (n < w * h * .02) {
+      URL.revokeObjectURL(url);
+      return say("I couldn't detect sufficient green foliage. Try a closer, well-illuminated plant photo.", PL);
+    }
+
+    const mx = sx / n, my = sy / n;
+    let a = 0, b2 = 0, cc = 0, per = 0, hr = 0, vr = 0;
+    for (let i = 0; i < w * h; i++) {
+      if (mk[i]) {
+        const X = i % w, Y = (i / w) | 0, dx = X - mx, dy = Y - my;
+        if (X === 0 || !mk[i - 1]) hr++;
+        if (Y === 0 || !mk[i - w]) vr++;
+        a += dx * dx; b2 += dy * dy; cc += dx * dy;
+        if (X < 1 || Y < 1 || X > w - 2 || Y > h - 2 || !mk[i - 1] || !mk[i + 1] || !mk[i - w] || !mk[i + w]) per++;
+      }
+    }
+
+    a /= n; b2 /= n; cc /= n;
+    const tr = a + b2, sq = Math.sqrt(Math.max(0, tr * tr / 4 - (a * b2 - cc * cc))), el = Math.sqrt((tr / 2 + sq) / Math.max(tr / 2 - sq, 1e-6)), pr = per / n;
+    const tall = hr / Math.max(vr, 1);
+    const mr = 2 * n / Math.max(hr + vr, 1);
+    S.arch = tall > 2.4 ? "strap" : (pr > .4 || mr < 15) ? "small" : "broad";
+    S.species = null;
+    S.hue = cl(hs / n, 60, 150);
+    A = ARCH[S.arch];
+
+    try { S.thumb = c.toDataURL("image/jpeg", .6); } catch (e) {}
+    $("#th").src = S.thumb || url;
+    $("#th").hidden = false;
+    setMode("p");
+    save();
+
+    say("Twin rebuilt from your photo: " + S.arch + " leaf type (tallness " + tall.toFixed(1) + ", leaf size " + mr.toFixed(0) + "px, edge ratio " + pr.toFixed(2) + "), leaf colour hue " + Math.round(S.hue) + "°. This is a colour/silhouette approximation, not a 3D scan. Analysing species…", PL);
+
+    const rd = new FileReader();
+    rd.onload = async () => {
+      const r = await api("/api/plants/analyze-image", { method: "POST", body: JSON.stringify({ image_data_url: rd.result, language: $("#lang").value, plant_name: S.name }) }, 40000);
+      if (r && r.analysis) {
+        say(r.analysis, PL);
+        matchSpecies(r.analysis);
+      } else {
+        say("Species analysis complete. You can tell Plant AI the plant name (e.g. “this is a monstera”) to configure the twin profile.", PL);
+      }
+    };
+    rd.readAsDataURL(f);
+  };
+  im.src = url;
+}
+
+/* ============================================================
+   REAL HUMAN HAND TRACKER & SPATIAL 3D PHYSICAL CONTROL
+   ============================================================ */
+const hv = $("#hv"), ho = $("#ho"), hoc = ho.getContext("2d"), hw = $("#hw");
+const hs = {
+  on: false, stream: null, model: null, busy: false, frames: 0,
+  seen: 0, lastX: 0.5, lastY: 0.5, lastScale: 0.2, last: 0,
+  xs: [], g: "", greet: -1e9, hold: 0, rz: 0, rr: -1e9, sw: -1e9
+};
+const D = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const CON = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8], [5, 9], [9, 10], [10, 11], [11, 12], [9, 13], [13, 14], [14, 15], [15, 16], [13, 17], [17, 18], [18, 19], [19, 20], [0, 17]];
+
+function gesture(l) {
+  const sz = D(l[0], l[9]) || .1;
+  const ex = (t, p) => D(l[t], l[0]) > D(l[p], l[0]) * 1.12;
+  const i = ex(8, 6), m = ex(12, 10), r = ex(16, 14), p = ex(20, 18), n = i + m + r + p;
+  if (D(l[4], l[8]) / sz < .3) return "PINCH";
+  if (n === 4) return "OPEN PALM";
+  if (n === 0) return "FIST";
+  if (i && !m && !r && !p) return "POINTING";
+  return "HAND";
+}
+
+function waveRev(a) {
+  let rev = 0, dir = 0, e = a[0][1];
+  for (const [, x] of a) {
+    if (!dir) {
+      if (Math.abs(x - e) > .05) { dir = Math.sign(x - e); e = x; }
+    } else if (dir > 0) {
+      if (x > e) e = x; else if (e - x > .05) { rev++; dir = -1; e = x; }
+    } else {
+      if (x < e) e = x; else if (x - e > .05) { rev++; dir = 1; e = x; }
+    }
+  }
+  return rev;
+}
+
+// Camera Monitor Size Toggle
+const toggleSizeBtn = $("#hw-toggle-size");
+if (toggleSizeBtn) {
+  toggleSizeBtn.onclick = () => {
+    hw.classList.toggle("hw-large");
+    toggleSizeBtn.textContent = hw.classList.contains("hw-large") ? "⚊" : "⛶";
+  };
+}
+
+function onHand(res) {
+  hs.frames++;
+  const hands = res.multiHandLandmarks || [];
+  const now = performance.now();
+  ho.width = hv.videoWidth || 320;
+  ho.height = hv.videoHeight || 240;
+  hoc.clearRect(0, 0, ho.width, ho.height);
+
+  if (!hands.length) {
+    const msg = now - hs.last > 4000 ? "🖐 HANDS: NOT SEEN — SHOW BOTH HANDS IN CAMERA" : "🖐 HANDS: SHOW YOUR HANDS";
+    if (hs.g !== msg) { hs.g = msg; chip("#ch", msg, 1); }
+    const hud = $("#hand-gesture-hud");
+    if (hud) hud.textContent = "SHOW BOTH HANDS FOR 2-HAND CONTROL";
+    hs.seen = 0;
+    hs.xs = [];
+    hs.hold = 0;
+    hs.lastDualDist = 0;
+    return;
+  }
+
+  // Parse each detected hand with mirrored coordinates
+  const parsedHands = hands.map((L, idx) => {
+    const g = gesture(L);
+    const cx_hand = (L[0].x + L[9].x) / 2;
+    const cy_hand = (L[0].y + L[9].y) / 2;
+    const curX = 1 - cx_hand; // Mirrored coordinate for natural human hand movement
+    const curY = cy_hand;
+    const handScale = Math.hypot(L[0].x - L[9].x, L[0].y - L[9].y);
+    const wy = L[0].y;
+    return { L, g, curX, curY, handScale, wy, idx };
+  });
+
+  // Sort hands so left-most on mirrored screen is Hand 1 (Bio-Core), right-most is Hand 2 (JARVIS-OS)
+  parsedHands.sort((a, b) => a.curX - b.curX);
+
+  // Draw skeletons for both hands
+  parsedHands.forEach((h, i) => {
+    const isBioHand = (parsedHands.length === 1) ? (h.curX < 0.5) : (i === 0);
+    // Neon Cyan for Left Hand (Bio-Core), Electric Amber for Right Hand (JARVIS-OS)
+    const boneColor = isBioHand
+      ? (h.wy < 0.28 ? "#38bdf8" : "#4de1ff")
+      : (h.g === "FIST" ? "#ffc857" : h.g === "PINCH" ? "#5dffb0" : "#ffc857");
+
+    hoc.strokeStyle = boneColor;
+    hoc.lineWidth = 2.5;
+    hoc.beginPath();
+    CON.forEach(([a, b]) => {
+      hoc.moveTo(h.L[a].x * ho.width, h.L[a].y * ho.height);
+      hoc.lineTo(h.L[b].x * ho.width, h.L[b].y * ho.height);
+    });
+    hoc.stroke();
+
+    hoc.fillStyle = isBioHand ? "#e6fff3" : "#fff8e6";
+    h.L.forEach((q, idx) => {
+      hoc.beginPath();
+      hoc.arc(q.x * ho.width, q.y * ho.height, [4, 8, 12, 16, 20].includes(idx) ? 4.5 : 2.5, 0, 6.283);
+      hoc.fill();
+    });
+
+    // Tag each hand in camera view
+    hoc.font = "bold 9px monospace";
+    hoc.fillStyle = isBioHand ? "#4de1ff" : "#ffc857";
+    const tagX = (1 - h.curX) * ho.width;
+    const tagY = Math.max(16, h.curY * ho.height - 18);
+    hoc.fillText(isBioHand ? "LH: BIO-CORE" : "RH: JARVIS-OS", tagX - 30, tagY);
+  });
+
+  let hudLabel = "";
+
+  // 1. DUAL-HAND SYNERGY (Both hands detected)
+  if (parsedHands.length >= 2) {
+    const hL = parsedHands[0]; // Left screen hand (Bio)
+    const hR = parsedHands[1]; // Right screen hand (JARVIS)
+
+    // Draw connecting energy laser/link between the two hands
+    const pL = { x: (1 - hL.curX) * ho.width, y: hL.curY * ho.height };
+    const pR = { x: (1 - hR.curX) * ho.width, y: hR.curY * ho.height };
+    hoc.save();
+    hoc.setLineDash([6, 4]);
+    hoc.strokeStyle = "rgba(93, 255, 176, 0.75)";
+    hoc.lineWidth = 2;
+    hoc.beginPath();
+    hoc.moveTo(pL.x, pL.y);
+    hoc.lineTo(pR.x, pR.y);
+    hoc.stroke();
+    hoc.restore();
+
+    const dualDist = Math.hypot(hR.curX - hL.curX, hR.curY - hL.curY);
+
+    // Synergy Gesture A: Both hands raised high -> BIO-SYNC RESONANCE
+    if (hL.wy < 0.28 && hR.wy < 0.28) {
+      hudLabel = "⚡ DUAL-HAND BIO-SYNC RESONANCE · MAXIMUM RAINFALL";
+      startRain();
+      S.moist = cl(S.moist + 0.5, 0, 100);
+      S.health = cl(S.health + 0.1, 0, 100);
+      if (now - hs.rr > 8000) {
+        hs.rr = now;
+        water();
+      }
+    }
+    // Synergy Gesture B: Both hands fists -> CYBER BIO-LOCK
+    else if (hL.g === "FIST" && hR.g === "FIST") {
+      hudLabel = "🔒 DUAL-FIST CYBER BIO-LOCK · ROTATION HALTED";
+      auto = false;
+    }
+    // Synergy Gesture C: Bimanual Zoom (spread hands apart / bring together)
+    else {
+      if (hs.lastDualDist) {
+        const deltaDist = dualDist - hs.lastDualDist;
+        if (Math.abs(deltaDist) > 0.005) {
+          zoom = cl(zoom * (1 + deltaDist * 2.5), 0.6, 2.5);
+          hudLabel = deltaDist > 0 ? "🔍 SPREADING HANDS · ZOOM IN" : "🔍 BRINGING HANDS CLOSER · ZOOM OUT";
+        }
+      }
+
+      // Allow Right Hand to orbit plant in 3D
+      if (hs.seen) {
+        const dxR = hR.curX - (hs.lastR_X || hR.curX);
+        const dyR = hR.curY - (hs.lastR_Y || hR.curY);
+        if (hR.g === "OPEN PALM" && (Math.abs(dxR) > 0.003 || Math.abs(dyR) > 0.003)) {
+          yaw += dxR * 4.8;
+          pitch = cl(pitch + dyR * 3.2, -0.2, 1.1);
+          auto = false;
+          if (!hudLabel) hudLabel = "🌐 RH: 3D HOLOGRAPHIC ORBIT + LH: BIO-MONITOR";
+        }
+      }
+
+      // Left hand high palm triggers rainfall
+      if (hL.wy < 0.28) {
+        hudLabel = "🌧️ LH: BIO-RAIN + RH: 3D ORBIT";
+        startRain();
+        S.moist = cl(S.moist + 0.35, 0, 100);
+      }
+
+      if (!hudLabel) {
+        hudLabel = "🙌 2-HAND AR ACTIVE: SPREAD TO ZOOM · LH: RAIN · RH: 3D ORBIT";
+      }
+    }
+
+    hs.lastDualDist = dualDist;
+    hs.lastR_X = hR.curX;
+    hs.lastR_Y = hR.curY;
+    chip("#ch", "🙌 2-HAND CONTROL: LH (BIO) + RH (JARVIS)", 1);
+  }
+  // 2. SINGLE-HAND DETECTED
+  else {
+    hs.lastDualDist = 0;
+    const h = parsedHands[0];
+    const isBioHand = h.curX < 0.5;
+    const dx = h.curX - hs.lastX;
+    const dy = h.curY - hs.lastY;
+
+    if (isBioHand) {
+      // Left Hand (Bio-Core Controller)
+      if (h.wy < 0.28) {
+        hudLabel = "🌧️ LH (BIO): RAISED HAND · RAINING ON PLANT";
+        hs.rz = hs.rz || now;
+        if (now - hs.rz > 600) {
+          startRain();
+          S.moist = cl(S.moist + 0.35, 0, 100);
+          if (now - hs.rr > 8000) {
+            hs.rr = now;
+            water();
+          }
+        }
+      } else if (h.g === "OPEN PALM") {
+        hudLabel = "🌿 LH (BIO): PALM DETECTED · BRING RH TO ORBIT/ZOOM";
+        if (Math.abs(dx) > 0.004) {
+          S.lt = cl(Math.round(S.lt + dx * 1000), 100, 3000);
+        }
+      } else if (h.g === "POINTING") {
+        hudLabel = "👉 LH (BIO): POINTING · INSPECTING ROOTS & FOLIAGE";
+      } else {
+        hudLabel = "🖐️ LH (BIO-CORE): " + h.g + " · SHOW 2ND HAND FOR DUAL-CONTROL";
+      }
+    } else {
+      // Right Hand (JARVIS OS Controller)
+      if (h.g === "OPEN PALM") {
+        if (Math.abs(dx) > 0.003 || Math.abs(dy) > 0.003) {
+          yaw += dx * 5.2;
+          pitch = cl(pitch + dy * 3.5, -0.2, 1.1);
+          auto = false;
+        }
+        const ds = h.handScale - hs.lastScale;
+        if (Math.abs(ds) > 0.006) {
+          zoom = cl(zoom * (1 + ds * 2.8), 0.6, 2.2);
+        }
+        hudLabel = "🌐 RH (JARVIS): 3D ORBIT · SHOW LH FOR 2-HAND ZOOM";
+      } else if (h.g === "FIST") {
+        hudLabel = "✊ RH (JARVIS): FIST · HIGH-TORQUE SPIN";
+        if (Math.abs(dx) > 0.004) { yaw += dx * 7.5; auto = false; }
+      } else if (h.g === "PINCH") {
+        hudLabel = "🔍 RH (JARVIS): PINCH · BOTANICAL FOCUS";
+      } else {
+        hudLabel = "🖐️ RH (JARVIS-OS): " + h.g + " · SHOW 2ND HAND FOR DUAL-CONTROL";
+      }
+    }
+
+    chip("#ch", isBioHand ? "🖐️ LH: BIO-CORE ACTIVE (SHOW RH)" : "🖐️ RH: JARVIS-OS ACTIVE (SHOW LH)", 1);
+  }
+
+  const hud = $("#hand-gesture-hud");
+  if (hud) hud.textContent = hudLabel;
+
+  hs.seen = 1;
+  hs.last = now;
+  hs.lastX = parsedHands[0].curX;
+  hs.lastY = parsedHands[0].curY;
+  hs.lastScale = parsedHands[0].handScale;
+}
+
+const loadScript = src => new Promise((ok, no) => {
+  const e = document.createElement("script");
+  e.src = src;
+  e.onload = ok;
+  e.onerror = () => no(new Error("could not load " + src));
+  document.head.appendChild(e);
+});
+
+async function loopHand() {
+  if (!hs.on) return;
+  if (!hs.busy && hv.readyState >= 2) {
+    hs.busy = true;
+    try { await hs.model.send({ image: hv }); } catch (e) { console.warn(e); }
+    hs.busy = false;
+  }
+  requestAnimationFrame(loopHand);
+}
+
+// MediaPipe Hands loader: bundled in vendor/mediapipe with CDN fallback
+const MP_LOCAL = "vendor/mediapipe/";
+const MP_CDN = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/";
+
+async function startHand() {
+  if (hs.on) return true;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    chip("#ch", "🖐 HAND: NEEDS HTTPS OR LOCALHOST", 0);
+    updateSensorsBanner();
+    return false;
+  }
+  try {
+    chip("#ch", "🖐 HAND: CONNECTING CAMERA…", 0);
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 640, height: 480, facingMode: "user" }
+    });
+    hs.stream = stream;
+    hv.srcObject = stream;
+    try { await hv.play(); } catch (err) { console.warn("video play:", err); }
+
+    chip("#ch", "🖐 HAND: LOADING MODEL…", 1);
+    let usedPath = MP_LOCAL;
+    if (!window.Hands) {
+      try {
+        await loadScript(MP_LOCAL + "hands.js");
+      } catch {
+        usedPath = MP_CDN;
+        await loadScript(MP_CDN + "hands.js");
+      }
+    }
+    if (!hs.model) {
+      const m = new Hands({ locateFile: f => usedPath + f });
+      m.setOptions({ maxNumHands: 2, modelComplexity: 0, minDetectionConfidence: .5, minTrackingConfidence: .5 });
+      m.onResults(onHand);
+      await m.initialize();
+      hs.model = m;
+    }
+
+    hs.on = true;
+    hs.last = performance.now();
+    hw.hidden = false;
+    chip("#ch", "🖐 HAND: SHOW YOUR PALM", 1);
+    loopHand();
+    updateSensorsBanner();
+    return true;
+  } catch (e) {
+    console.warn("startHand error:", e);
+    const isBlocked = e && (e.name === "NotAllowedError" || e.name === "PermissionDeniedError");
+    const isNotFound = e && (e.name === "NotFoundError" || e.name === "DevicesNotFoundError");
+    chip("#ch", "🖐 HAND: " + (isBlocked ? "CAMERA BLOCKED · TAP TO UNBLOCK" : isNotFound ? "NO CAMERA FOUND" : "CAMERA ERROR · RETRY"), 0);
+    updateSensorsBanner();
+    return false;
+  }
+}
+
+function stopHand() {
+  if (!hs.on) return;
+  hs.on = false;
+  if (hs.stream) hs.stream.getTracks().forEach(t => t.stop());
+  hw.hidden = true;
+  chip("#ch", "🖐 HAND: OFF (tap to resume)", 0);
+  updateSensorsBanner();
+}
+
+/* ============================================================
+   SECURITY POLICY, PERMISSIONS & DIAGNOSTICS SUITE
+   ============================================================ */
+
+function checkSecurityAndPolicy() {
+  const isSec = window.isSecureContext || ["localhost", "127.0.0.1"].includes(location.hostname);
+  const inIframe = window.self !== window.top;
+
+  // Set breakout links
+  ["#btn-direct-tab", "#modal-btn-popout", "#diag-btn-breakout", "#sec-banner-link"].forEach(sel => {
+    const el = $(sel);
+    if (el) el.href = location.href;
+  });
+
+  const banner = $("#sec-banner");
+  const bannerText = $("#sec-banner-text");
+  const whyBtn = $("#btn-why-blocked");
+
+  if (inIframe && (!hs.on || !always)) {
+    if (banner) {
+      banner.hidden = false;
+      if (bannerText) bannerText.textContent = "⚡ Embedded Preview: Browser security policies restrict camera/microphone inside iframes. Open directly in a new tab for direct sensor access.";
+    }
+    if (whyBtn) whyBtn.hidden = false;
+  } else if (!isSec) {
+    if (banner) {
+      banner.hidden = false;
+      if (bannerText) bannerText.textContent = "⚠️ Insecure Context: Browsers require HTTPS or localhost to enable camera & microphone.";
+    }
+  } else {
+    if (banner && hs.on && always) banner.hidden = true;
+  }
+}
+
+function showPermsModal() {
+  const m = $("#modal-perms");
+  if (m) m.hidden = false;
+  checkSecurityAndPolicy();
+}
+function hidePermsModal() {
+  const m = $("#modal-perms");
+  if (m) m.hidden = true;
+}
+
+function showDiagModal() {
+  const m = $("#modal-diagnostics");
+  if (m) {
+    m.hidden = false;
+    runAllDiagnostics();
+  }
+}
+function hideDiagModal() {
+  const m = $("#modal-diagnostics");
+  if (m) m.hidden = true;
+}
+
+// Modal wiring
+$("#modal-perms-close") && ($("#modal-perms-close").onclick = hidePermsModal);
+$("#modal-btn-activate") && ($("#modal-btn-activate").onclick = () => { hidePermsModal(); activateSensors(true); });
+$("#modal-btn-diag") && ($("#modal-btn-diag").onclick = () => { hidePermsModal(); showDiagModal(); });
+$("#btn-why-blocked") && ($("#btn-why-blocked").onclick = (e) => {
+  // Direct open dedicated diagnostic page
+  window.open("check.html", "_blank");
+});
+$("#cw") && ($("#cw").onclick = () => { if (!always) window.open("check.html", "_blank"); });
+$("#ch") && ($("#ch").onclick = () => { if (!hs.on) window.open("check.html", "_blank"); });
+
+const btnFs = $("#btn-fs");
+if (btnFs) {
+  btnFs.onclick = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(() => {});
+      btnFs.textContent = "Exit Fullscreen";
+    } else {
+      document.exitFullscreen?.().catch(() => {});
+      btnFs.textContent = "⛶ Fullscreen";
+    }
+  };
+}
+document.addEventListener("fullscreenchange", () => {
+  if (btnFs) btnFs.textContent = document.fullscreenElement ? "Exit Fullscreen" : "⛶ Fullscreen";
+});
+
+$("#btn-diag") && ($("#btn-diag").onclick = showDiagModal);
+$("#sec-banner-diag") && ($("#sec-banner-diag").onclick = showDiagModal);
+$("#modal-diag-close") && ($("#modal-diag-close").onclick = hideDiagModal);
+$("#modal-diag-done") && ($("#modal-diag-done").onclick = hideDiagModal);
+$("#diag-btn-run-all") && ($("#diag-btn-run-all").onclick = runAllDiagnostics);
+
+async function runAllDiagnostics() {
+  // 1. Security Context
+  const isSec = window.isSecureContext || ["localhost", "127.0.0.1"].includes(location.hostname);
+  const secSt = $("#diag-sec-status"), secDesc = $("#diag-sec-desc");
+  if (secSt) {
+    secSt.className = "diag-badge " + (isSec ? "pass" : "fail");
+    secSt.textContent = isSec ? "SECURE (PASS)" : "INSECURE (FAIL)";
+  }
+  if (secDesc) {
+    secDesc.textContent = isSec ? ("Secure origin: " + location.protocol + "//" + location.host + " (isSecureContext: true)") : "Non-secure context. Camera & Speech APIs require HTTPS or localhost.";
+  }
+
+  // 2. Iframe Isolation
+  const inIframe = window.self !== window.top;
+  const frSt = $("#diag-frame-status"), frDesc = $("#diag-frame-desc");
+  if (frSt) {
+    frSt.className = "diag-badge " + (inIframe ? "warn" : "pass");
+    frSt.textContent = inIframe ? "EMBEDDED IFRAME (WARN)" : "DIRECT WINDOW (PASS)";
+  }
+  if (frDesc) {
+    frDesc.textContent = inIframe ? "App is running inside an iframe. If the parent container does not grant allow='camera; microphone', browsers will silently reject access. Use 'Open in Direct Window' below to test in top-level context." : "Running directly in top-level window. Full browser hardware permissions supported.";
+  }
+
+  // 3. Microphone Test
+  const micSt = $("#diag-mic-status"), micDesc = $("#diag-mic-desc");
+  try {
+    const aStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if (micSt) { micSt.className = "diag-badge pass"; micSt.textContent = "CONNECTED (PASS)"; }
+    const track = aStream.getAudioTracks()[0];
+    if (micDesc) micDesc.textContent = "Device: " + (track.label || "Default Microphone") + " (enabled: " + track.enabled + ", state: " + track.readyState + ")";
+    initMicAudioMeter(aStream);
+  } catch (err) {
+    if (micSt) { micSt.className = "diag-badge fail"; micSt.textContent = "BLOCKED (FAIL)"; }
+    if (micDesc) micDesc.textContent = "Error: " + err.name + " - " + err.message + ". Ensure microphone permission is Allowed in browser address bar.";
+  }
+
+  // 4. Speech Recognition Engine
+  const spSt = $("#diag-speech-status"), spDesc = $("#diag-speech-desc");
+  if (SR) {
+    if (spSt) { spSt.className = "diag-badge pass"; spSt.textContent = "SUPPORTED (PASS)"; }
+    if (spDesc) spDesc.textContent = "Web Speech API available: " + (window.SpeechRecognition ? "Standard" : "webkitSpeechRecognition") + ". Language: " + $("#lang").value + ".";
+  } else {
+    if (spSt) { spSt.className = "diag-badge fail"; spSt.textContent = "NOT SUPPORTED (FAIL)"; }
+    if (spDesc) spDesc.textContent = "SpeechRecognition not available in this browser. Please use Chrome, Edge, or Safari.";
+  }
+
+  // 5. Camera Test
+  const camSt = $("#diag-cam-status"), camDesc = $("#diag-cam-desc");
+  try {
+    const vStream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+    if (camSt) { camSt.className = "diag-badge pass"; camSt.textContent = "CONNECTED (PASS)"; }
+    const track = vStream.getVideoTracks()[0];
+    const settings = track.getSettings ? track.getSettings() : {};
+    if (camDesc) camDesc.textContent = "Device: " + (track.label || "Camera") + " (" + (settings.width || 640) + "x" + (settings.height || 480) + " @ " + (settings.frameRate || 30) + "fps)";
+    vStream.getTracks().forEach(t => t.stop());
+  } catch (err) {
+    if (camSt) { camSt.className = "diag-badge fail"; camSt.textContent = "BLOCKED (FAIL)"; }
+    if (camDesc) camDesc.textContent = "Error: " + err.name + " - " + err.message + ". Ensure camera permission is Allowed in browser address bar.";
+  }
+
+  // 6. MediaPipe Model
+  const mpSt = $("#diag-mp-status"), mpDesc = $("#diag-mp-desc");
+  if (window.Hands || hs.model) {
+    if (mpSt) { mpSt.className = "diag-badge pass"; mpSt.textContent = "LOADED (PASS)"; }
+    if (mpDesc) mpDesc.textContent = "MediaPipe Hands 21-landmark neural network is initialized and active.";
+  } else {
+    if (mpSt) { mpSt.className = "diag-badge warn"; mpSt.textContent = "READY TO LOAD"; }
+    if (mpDesc) mpDesc.textContent = "Bundled locally in vendor/mediapipe/ with automatic CDN fallback.";
+  }
+}
+
+// Individual diagnostic test buttons
+$("#diag-btn-test-mic") && ($("#diag-btn-test-mic").onclick = async () => {
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+    initMicAudioMeter(s);
+    toast("Microphone active! Check the live VU meter in the header.");
+    $("#diag-mic-status").className = "diag-badge pass";
+    $("#diag-mic-status").textContent = "CONNECTED (PASS)";
+  } catch (e) {
+    toast("Microphone test error: " + e.message);
+  }
+});
+
+$("#diag-btn-test-speech") && ($("#diag-btn-test-speech").onclick = () => {
+  toast("Say 'Hey Jarvis' or speak now...");
+  startWake();
+});
+
+$("#diag-btn-test-cam") && ($("#diag-btn-test-cam").onclick = async () => {
+  toast("Connecting camera...");
+  const ok = await startHand();
+  toast(ok ? "Camera online! Show your palm." : "Camera blocked. Check permissions.");
+});
+
+$("#diag-btn-test-tts") && ($("#diag-btn-test-tts").onclick = () => {
+  say("JARVIS audio system online. Speech synthesis is fully operational.");
+});
+
+$("#ch").style.cursor = "pointer";
+$("#cw").style.cursor = "pointer";
+$("#ch").title = "Click to toggle camera or test real human hand tracking";
+$("#cw").title = "Click to toggle microphone or test voice";
+
+$("#ch").onclick = async () => {
+  if (hs.on) {
+    stopHand();
+    toast("Camera tracking paused. Tap again to resume.");
+  } else {
+    toast("Connecting camera for real human hand tracking...");
+    const ok = await startHand();
+    if (ok) {
+      toast("Camera connected! Move your physical hand to rotate the plant twin.");
+    } else {
+      showPermsModal();
+    }
+  }
+};
+
+$("#cw").onclick = async () => {
+  if (always) {
+    always = false;
+    if (wrec) {
+      try { wrec.abort(); } catch (e) {}
+    }
+    chip("#cw", "🎙 VOICE: PAUSED (tap to resume)", 0);
+    toast("Voice listening paused.");
+    updateSensorsBanner();
+  } else {
+    toast("Connecting microphone...");
+    const ok = await startWake();
+    if (ok) {
+      toast("Microphone active! Listening for voice commands.");
+    } else {
+      showPermsModal();
+    }
+  }
+};
+
+let activating = false;
+async function activateSensors(notify = true) {
+  if (activating) return;
+  activating = true;
+  try {
+    if (notify) toast("Checking camera & microphone access...");
+    const a = await startHand();
+    const b = await startWake();
+    updateSensorsBanner();
+    if (a && b) {
+      if (notify) {
+        toast("Sensors active! Real human hand tracking & voice assistant online.");
+        say("Sensors online. Real human hand control and voice assistant are active.");
+      }
+    } else if (a) {
+      if (notify) toast("Camera active! Show your palm to spatially control the twin.");
+    } else if (b) {
+      if (notify) toast("Microphone active! Listening for commands.");
+    } else if (notify) {
+      toast("Sensors blocked by browser or iframe. Open diagnostics to check.");
+      showPermsModal();
+    }
+    return a || b;
+  } finally {
+    activating = false;
+  }
+}
+
+const btnRec = $("#btn-reconnect");
+if (btnRec) {
+  btnRec.onclick = () => activateSensors(true);
+}
+$("#en") && ($("#en").onclick = () => activateSensors(true));
+
+// Auto-activate sensors as soon as window/tab regains focus or visibility
+window.addEventListener("focus", () => {
+  if (!hs.on || !always) {
+    activateSensors(false);
+  }
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && (!hs.on || !always)) {
+    activateSensors(false);
+  }
+});
+
+// Unlock speech synthesis audio context on first user interaction
+window.addEventListener("pointerdown", () => {
+  if ("speechSynthesis" in window && speechSynthesis.paused) {
+    speechSynthesis.resume();
+  }
+}, { once: false });
+
+if (S.thumb) {
+  $("#th").src = S.thumb;
+  $("#th").hidden = false;
+}
+
+checkSecurityAndPolicy();
+
+
+// Mouse/touch canvas controls
+let dg = null;
+cv.onpointerdown = e => {
+  dg = [e.clientX, e.clientY];
+  cv.setPointerCapture(e.pointerId);
+  auto = false;
+};
+cv.onpointermove = e => {
+  if (!dg) return;
+  yaw += (e.clientX - dg[0]) * .008;
+  pitch = cl(pitch + (e.clientY - dg[1]) * .006, -.2, 1.1);
+  dg = [e.clientX, e.clientY];
+};
+cv.onpointerup = () => dg = null;
+cv.addEventListener("wheel", e => {
+  e.preventDefault();
+  zoom = cl(zoom * (e.deltaY > 0 ? .93 : 1.07), .6, 2.2);
+}, { passive: false });
+
+let t0 = performance.now();
+(function loop(n) {
+  if (hs.on && n - (loop.l || 0) < 33) {
+    requestAnimationFrame(loop);
+    return;
+  }
+  loop.l = n;
+  const t = (n - t0) / 1000;
+  if (auto) yaw += .004;
+  drawTwin(t);
+  drawOrb(t);
+  requestAnimationFrame(loop);
+})(t0);
+
+/* Boot */
+setDay(S.day);
+api("/api/plants/" + S.id).then(p => {
+  if (p) {
+    S.name = p.name;
+    S.moist = p.moisture;
+    S.temp = p.temperature_c;
+    S.hum = p.humidity;
+    S.lux = S.lt = p.light_lux;
+  }
+  loadItems();
+});
+
+say(`Good day. JARVIS online. ${S.name}'s digital twin is active. Say "Hey Jarvis", raise your palm high for rain, wave at the camera, or type.`);
+</script>
+</body>
+</html>

@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#030a09">
+  <title>PlantTwin JARVIS · Camera &amp; Microphone Diagnostics</title>
+  <meta name="description" content="Sensor and permission diagnostic utility for PlantTwin JARVIS. Tests camera, microphone, Web Speech API, and browser security contexts with step-by-step unblocking instructions.">
+  <script src="assets/config.js"></script>
+  <style>
+    :root {
+      --bg: #030a09;
+      --pn: rgba(8, 26, 22, .82);
+      --ln: rgba(93, 255, 176, .22);
+      --g: #5dffb0;
+      --c: #4de1ff;
+      --w: #ffc857;
+      --r: #ff6b6b;
+      --t: #e6fff3;
+      --m: #8fb8a8;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: radial-gradient(1200px 700px at 50% 20%, #0b2a22 0, var(--bg) 70%);
+      color: var(--t);
+      font: 14px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      padding: 0 0 40px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--ln);
+      background: rgba(3, 10, 9, 0.85);
+      backdrop-filter: blur(14px);
+      flex-wrap: wrap;
+    }
+    .logo {
+      font-weight: 800;
+      letter-spacing: .2em;
+      font-size: 14px;
+      font-family: monospace;
+    }
+    .logo b { color: var(--g); }
+    .sp { flex: 1; }
+    .btn {
+      background: rgba(93, 255, 176, .1);
+      border: 1px solid var(--ln);
+      border-radius: 10px;
+      padding: 7px 14px;
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--t);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .2s;
+    }
+    .btn:hover {
+      border-color: var(--g);
+      box-shadow: 0 0 14px rgba(93, 255, 176, .3);
+    }
+    .btn.pri {
+      background: linear-gradient(135deg, #2cf0a0, #18b6d4);
+      color: #032;
+      font-weight: 700;
+      border: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 24px auto;
+      padding: 0 18px;
+    }
+    .hero {
+      background: var(--pn);
+      border: 1px solid var(--ln);
+      border-radius: 18px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 30px rgba(0, 0, 0, .4) inset;
+    }
+    .hero h1 {
+      font-size: 20px;
+      letter-spacing: .12em;
+      font-family: monospace;
+      color: var(--g);
+      margin-bottom: 8px;
+    }
+    .hero p {
+      color: var(--m);
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .card {
+      background: var(--pn);
+      border: 1px solid var(--ln);
+      border-radius: 16px;
+      padding: 18px 20px;
+      backdrop-filter: blur(12px);
+    }
+    .card-hdr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      font-family: monospace;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 11px;
+      letter-spacing: .1em;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-family: monospace;
+      font-weight: 700;
+    }
+    .badge.pass { background: rgba(93, 255, 176, .2); color: var(--g); border: 1px solid var(--g); }
+    .badge.fail { background: rgba(255, 107, 107, .2); color: var(--r); border: 1px solid var(--r); }
+    .badge.warn { background: rgba(255, 200, 87, .2); color: var(--w); border: 1px solid var(--w); }
+    .badge.idle { background: rgba(255, 255, 255, .1); color: var(--m); border: 1px solid var(--ln); }
+    .desc {
+      font-size: 13px;
+      color: var(--m);
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+    .output-box {
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid var(--ln);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: monospace;
+      font-size: 12px;
+      margin-top: 10px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+    .action-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .preview-box {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      aspect-ratio: 4/3;
+      background: #000;
+      border-radius: 10px;
+      border: 1px solid var(--ln);
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    .preview-box video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+    .guide-box {
+      background: rgba(255, 200, 87, 0.08);
+      border: 1px solid var(--w);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 12px;
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+    .guide-box h4 {
+      color: var(--w);
+      font-family: monospace;
+      font-size: 12px;
+      letter-spacing: .08em;
+      margin-bottom: 6px;
+    }
+    .guide-box ol {
+      margin-left: 20px;
+      color: var(--t);
+    }
+    .guide-box li {
+      margin-bottom: 4px;
+    }
+    .vu-bar {
+      height: 12px;
+      background: rgba(255, 255, 255, .1);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 8px;
+      position: relative;
+      border: 1px solid var(--ln);
+    }
+    .vu-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--g), var(--c));
+      box-shadow: 0 0 10px var(--g);
+      transition: width 0.05s ease-out;
+    }
+    details {
+      margin-top: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--ln);
+      border-radius: 10px;
+      padding: 8px 12px;
+    }
+    summary {
+      font-family: monospace;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--g);
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">PLANT<b>TWIN</b> · <b>HARDWARE &amp; PERMISSION DIAGNOSTICS</b></div>
+    <div class="sp"></div>
+    <a href="index.html" class="btn">← Back to PlantTwin JARVIS</a>
+    <a id="btn-top-direct" href="" target="_blank" class="btn pri">↗ Open in Direct Tab</a>
+  </header>
+
+  <div class="container">
+    <section class="hero">
+      <h1>SENSOR &amp; PERMISSION AUDIT</h1>
+      <p>
+        PlantTwin JARVIS uses your browser's real <b>Webcam</b> (for MediaPipe AI hand tracking) and <b>Microphone</b> (for voice wake-word recognition).
+        If the browser shows <i>"WHY BLOCKED? ↗"</i> or the sensors fail to start, run the automated tests below to identify the exact cause and see clear instructions to unblock them.
+      </p>
+      <div class="action-row" style="margin-top:14px">
+        <button id="btn-run-all" class="btn pri">⚡ Run All Tests Automatically</button>
+        <span style="font-size:12px;color:var(--m);font-family:monospace">Direct URL: <span id="current-url" style="color:var(--t)"></span></span>
+      </div>
+    </section>
+
+    <div class="grid">
+      <!-- Test 1: HTTPS & Secure Context -->
+      <div class="card" id="card-sec">
+        <div class="card-hdr">
+          <div class="card-title">1. Secure Context &amp; HTTPS</div>
+          <span class="badge idle" id="badge-sec">NOT RUN</span>
+        </div>
+        <p class="desc">
+          Modern web browsers (Chrome, Edge, Firefox, Safari) strictly require an HTTPS secure context or <code>localhost</code> before exposing hardware devices (camera, microphone) to JavaScript.
+        </p>
+        <div class="output-box" id="out-sec">Click "Test Context" to evaluate.</div>
+        <div class="action-row">
+          <button class="btn" id="btn-test-sec">Test Context</button>
+        </div>
+      </div>
+
+      <!-- Test 2: Iframe Confinement -->
+      <div class="card" id="card-iframe">
+        <div class="card-hdr">
+          <div class="card-title">2. Iframe Isolation &amp; Permissions Policy</div>
+          <span class="badge idle" id="badge-iframe">NOT RUN</span>
+        </div>
+        <p class="desc">
+          If this page is embedded inside an <code>&lt;iframe&gt;</code> container, the parent container must explicitly grant <code>allow="camera; microphone"</code>. If that attribute is missing, browser security completely suppresses the permission popup.
+        </p>
+        <div class="output-box" id="out-iframe">Click "Test Iframe Policy" to evaluate.</div>
+        <div class="action-row">
+          <button class="btn" id="btn-test-iframe">Test Iframe Policy</button>
+          <a id="btn-card-direct" href="" target="_blank" class="btn">↗ Open Directly in New Tab</a>
+        </div>
+      </div>
+
+      <!-- Test 3: Microphone Permission & Audio Stream -->
+      <div class="card" id="card-mic">
+        <div class="card-hdr">
+          <div class="card-title">3. Microphone Hardware &amp; Stream Test</div>
+          <span class="badge idle" id="badge-mic">NOT RUN</span>
+        </div>
+        <p class="desc">
+          Tests your microphone hardware through <code>navigator.mediaDevices.getUserMedia({ audio: true })</code> and displays a real-time audio VU meter.
+        </p>
+        <div class="vu-bar"><div class="vu-fill" id="vu-mic"></div></div>
+        <div class="output-box" id="out-mic">Ready to test. Tap the button below to request microphone access.</div>
+        <div class="action-row">
+          <button class="btn" id="btn-test-mic">🎙️ Test Microphone</button>
+        </div>
+        <div class="guide-box" id="guide-mic" hidden>
+          <h4 id="guide-mic-title">HOW TO UNBLOCK MICROPHONE</h4>
+          <div id="guide-mic-body"></div>
+        </div>
+      </div>
+
+      <!-- Test 4: Camera Hardware & Video Stream -->
+      <div class="card" id="card-cam">
+        <div class="card-hdr">
+          <div class="card-title">4. Camera Hardware &amp; Video Stream Test</div>
+          <span class="badge idle" id="badge-cam">NOT RUN</span>
+        </div>
+        <p class="desc">
+          Tests your camera hardware through <code>navigator.mediaDevices.getUserMedia({ video: true })</code> and renders a mirrored preview stream.
+        </p>
+        <div class="preview-box" id="cam-box" hidden>
+          <video id="cam-video" autoplay muted playsinline></video>
+        </div>
+        <div class="output-box" id="out-cam">Ready to test. Tap the button below to request camera access.</div>
+        <div class="action-row">
+          <button class="btn" id="btn-test-cam">📷 Test Camera</button>
+        </div>
+        <div class="guide-box" id="guide-cam" hidden>
+          <h4 id="guide-cam-title">HOW TO UNBLOCK CAMERA</h4>
+          <div id="guide-cam-body"></div>
+        </div>
+      </div>
+
+      <!-- Test 5: Speech Recognition Engine -->
+      <div class="card" id="card-speech">
+        <div class="card-hdr">
+          <div class="card-title">5. Web Speech Recognition API</div>
+          <span class="badge idle" id="badge-speech">NOT RUN</span>
+        </div>
+        <p class="desc">
+          Verifies whether the browser natively supports <code>webkitSpeechRecognition</code> or <code>SpeechRecognition</code> for continuous voice assistant wake-word processing.
+        </p>
+        <div class="output-box" id="out-speech">Ready to test voice recognition engine.</div>
+        <div class="action-row">
+          <button class="btn" id="btn-test-speech">🗣️ Test Speech Recognition (Speak Now)</button>
+        </div>
+      </div>
+
+      <!-- Test 6: Browser Environment & Step-by-Step Guides -->
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title">6. Browser Settings Reference Guide</div>
+        </div>
+        <p class="desc">Step-by-step instructions for resetting blocked camera and microphone permissions by browser:</p>
+        
+        <details open>
+          <summary>Google Chrome / Microsoft Edge (Chromium)</summary>
+          <div style="font-size:12.5px;padding:8px 0;line-height:1.6;color:var(--m)">
+            1. Look at the left side of the address bar at the top of the browser.<br>
+            2. Click the <b>Site Settings (tune/lock)</b> icon: <code>🔒</code> or <code>🎛️</code>.<br>
+            3. Find <b>Camera</b> and switch it from <i>"Block"</i> to <b>"Allow"</b>.<br>
+            4. Find <b>Microphone</b> and switch it from <i>"Block"</i> to <b>"Allow"</b>.<br>
+            5. Click the <b>Reload</b> button in Chrome or press <b>Ctrl+R / Cmd+R</b>.
+          </div>
+        </details>
+
+        <details>
+          <summary>Mozilla Firefox</summary>
+          <div style="font-size:12.5px;padding:8px 0;line-height:1.6;color:var(--m)">
+            1. In the address bar, look for the crossed-out camera or microphone icon.<br>
+            2. Click the icon, then click the <b>"✕"</b> next to <i>Blocked</i> or <i>Blocked Temporarily</i>.<br>
+            3. Reload the page and select <b>"Remember this decision"</b> when the prompt asks.
+          </div>
+        </details>
+
+        <details>
+          <summary>Windows / macOS System Permissions</summary>
+          <div style="font-size:12.5px;padding:8px 0;line-height:1.6;color:var(--m)">
+            <b>Windows 10/11:</b> Open <i>Settings ➔ Privacy &amp; Security ➔ Camera</i> (and <i>Microphone</i>). Ensure "Camera access" is ON and "Let desktop apps access your camera/microphone" is ON.<br>
+            <b>macOS:</b> Open <i>System Settings ➔ Privacy &amp; Security ➔ Camera</i> (and <i>Microphone</i>). Ensure your browser (Chrome, Edge, Firefox, Safari) is toggled ON.
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const curUrl = window.location.href;
+    document.getElementById("current-url").textContent = curUrl;
+    document.getElementById("btn-top-direct").href = curUrl;
+    document.getElementById("btn-card-direct").href = curUrl;
+
+    function setBadge(id, state, text) {
+      const b = document.getElementById(id);
+      b.className = "badge " + state;
+      b.textContent = text;
+    }
+
+    // 1. Security Context Test
+    function testSecurityContext() {
+      const isSec = window.isSecureContext;
+      const proto = window.location.protocol;
+      const host = window.location.hostname;
+      const isLocal = host === "localhost" || host === "127.0.0.1" || host === "[::1]";
+      const out = document.getElementById("out-sec");
+
+      if (isSec || proto === "https:" || isLocal) {
+        setBadge("badge-sec", "pass", "PASS");
+        out.textContent = `✅ SECURE CONTEXT CONFIRMED\nProtocol: ${proto}\nHostname: ${host}\nwindow.isSecureContext: ${isSec}\nHardware APIs (Camera, Microphone, Web Audio) are allowed.`;
+        return true;
+      } else {
+        setBadge("badge-sec", "fail", "INSECURE");
+        out.textContent = `❌ INSECURE CONTEXT (HTTP)\nProtocol: ${proto}\nHostname: ${host}\nBrowser security prevents getUserMedia() on plain HTTP unless localhost.\nFIX: Access this application via HTTPS or localhost.`;
+        return false;
+      }
+    }
+
+    // 2. Iframe Test
+    function testIframePolicy() {
+      const inIframe = (window.self !== window.top);
+      const out = document.getElementById("out-iframe");
+      if (!inIframe) {
+        setBadge("badge-iframe", "pass", "TOP-LEVEL (PASS)");
+        out.textContent = `✅ RUNNING IN DIRECT TAB (NO IFRAME)\nYour browser has direct hardware access without container policy restrictions.`;
+        return true;
+      } else {
+        setBadge("badge-iframe", "warn", "INSIDE IFRAME");
+        out.textContent = `⚠️ RUNNING INSIDE AN EMBEDDED IFRAME\nContainer frames frequently restrict permissions-policy for camera and microphone.\nRECOMMENDATION: Click "↗ Open Directly in New Tab" to launch directly with native hardware access.`;
+        return false;
+      }
+    }
+
+    // 3. Microphone Test
+    let micStream = null;
+    let micAudioCtx = null;
+    let micAnimId = null;
+
+    async function testMicrophone() {
+      const out = document.getElementById("out-mic");
+      const vu = document.getElementById("vu-mic");
+      const guide = document.getElementById("guide-mic");
+      const guideBody = document.getElementById("guide-mic-body");
+      guide.hidden = true;
+      setBadge("badge-mic", "idle", "TESTING...");
+      out.textContent = "Requesting microphone stream from browser...";
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setBadge("badge-mic", "fail", "UNSUPPORTED");
+        out.textContent = "❌ navigator.mediaDevices.getUserMedia is undefined in this browser/environment.";
+        return;
+      }
+
+      try {
+        if (micStream) {
+          micStream.getTracks().forEach(t => t.stop());
+          micStream = null;
+        }
+        if (micAnimId) cancelAnimationFrame(micAnimId);
+
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const tracks = micStream.getAudioTracks();
+        const label = tracks[0]?.label || "Default Microphone";
+        setBadge("badge-mic", "pass", "CONNECTED (PASS)");
+        out.textContent = `✅ MICROPHONE CONNECTED & STREAMING\nDevice: ${label}\nStatus: Active (Sample rate: ${tracks[0]?.getSettings?.()?.sampleRate || "Standard"} Hz)\nSpeak now to see the audio level meter animate below!`;
+
+        // VU meter animation
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          micAudioCtx = new AudioContext();
+          const src = micAudioCtx.createMediaStreamSource(micStream);
+          const an = micAudioCtx.createAnalyser();
+          an.fftSize = 64;
+          src.connect(an);
+          const data = new Uint8Array(an.frequencyBinCount);
+
+          function updateVU() {
+            if (!micStream) return;
+            an.getByteFrequencyData(data);
+            let sum = 0;
+            for (let i = 0; i < data.length; i++) sum += data[i];
+            const avg = sum / data.length;
+            const pct = Math.min(100, Math.round((avg / 128) * 100));
+            vu.style.width = pct + "%";
+            micAnimId = requestAnimationFrame(updateVU);
+          }
+          updateVU();
+        } catch (e) {
+          console.warn("AudioContext meter error:", e);
+        }
+
+      } catch (err) {
+        setBadge("badge-mic", "fail", "BLOCKED / ERROR");
+        guide.hidden = false;
+        const errName = err.name || "Error";
+        out.textContent = `❌ MICROPHONE ACCESS FAILED: [${errName}]\nDetails: ${err.message}`;
+
+        if (errName === "NotAllowedError" || errName === "PermissionDeniedError") {
+          guideBody.innerHTML = `
+            <b>Cause:</b> Microphone permission is currently set to <b>"Block"</b> for this site.<br>
+            <b>How to Fix:</b>
+            <ol>
+              <li>Click the <b>tune/padlock icon 🔒</b> on the far-left of your address bar.</li>
+              <li>Toggle <b>Microphone</b> to <b>"Allow"</b>.</li>
+              <li>If inside an iframe, click <b>"↗ Open Directly in New Tab"</b> at the top right.</li>
+              <li>Refresh the page.</li>
+            </ol>
+          `;
+        } else if (errName === "NotFoundError" || errName === "DevicesNotFoundError") {
+          guideBody.innerHTML = `
+            <b>Cause:</b> No microphone hardware was detected by your operating system.<br>
+            <b>How to Fix:</b> Plug in a USB or 3.5mm microphone, headset, or enable your built-in laptop mic in system sound settings.
+          `;
+        } else if (errName === "NotReadableError" || errName === "TrackStartError") {
+          guideBody.innerHTML = `
+            <b>Cause:</b> Hardware conflict. Another application (e.g., Zoom, Teams, Skype, Discord) is currently using your microphone exclusively.<br>
+            <b>How to Fix:</b> Close background video conferencing or voice apps and click "Test Microphone" again.
+          `;
+        } else {
+          guideBody.innerHTML = `
+            <b>Cause:</b> Browser security constraint or permission policy.<br>
+            <b>How to Fix:</b> Launch in a direct top-level tab using the button above and verify browser settings.
+          `;
+        }
+      }
+    }
+
+    // 4. Camera Test
+    let camStream = null;
+
+    async function testCamera() {
+      const out = document.getElementById("out-cam");
+      const box = document.getElementById("cam-box");
+      const video = document.getElementById("cam-video");
+      const guide = document.getElementById("guide-cam");
+      const guideBody = document.getElementById("guide-cam-body");
+      guide.hidden = true;
+      setBadge("badge-cam", "idle", "TESTING...");
+      out.textContent = "Requesting camera stream from browser...";
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setBadge("badge-cam", "fail", "UNSUPPORTED");
+        out.textContent = "❌ navigator.mediaDevices.getUserMedia is undefined in this browser.";
+        return;
+      }
+
+      try {
+        if (camStream) {
+          camStream.getTracks().forEach(t => t.stop());
+          camStream = null;
+        }
+
+        camStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" }
+        });
+        video.srcObject = camStream;
+        box.hidden = false;
+        await video.play();
+
+        const tracks = camStream.getVideoTracks();
+        const label = tracks[0]?.label || "Default Camera";
+        const settings = tracks[0]?.getSettings?.() || {};
+        setBadge("badge-cam", "pass", "CONNECTED (PASS)");
+        out.textContent = `✅ CAMERA CONNECTED & ACTIVE\nDevice: ${label}\nResolution: ${settings.width || 640}x${settings.height || 480}\nMediaPipe AI hand gesture tracking is fully supported!`;
+
+      } catch (err) {
+        setBadge("badge-cam", "fail", "BLOCKED / ERROR");
+        guide.hidden = false;
+        box.hidden = true;
+        const errName = err.name || "Error";
+        out.textContent = `❌ CAMERA ACCESS FAILED: [${errName}]\nDetails: ${err.message}`;
+
+        if (errName === "NotAllowedError" || errName === "PermissionDeniedError") {
+          guideBody.innerHTML = `
+            <b>Cause:</b> Camera permission is blocked in your browser settings.<br>
+            <b>How to Fix:</b>
+            <ol>
+              <li>Click the <b>padlock or tune icon 🔒</b> on the left of your browser address bar.</li>
+              <li>Change <b>Camera</b> from <i>Block</i> to <b>Allow</b>.</li>
+              <li>If you are in an embedded sandbox, click <b>"↗ Open Directly in New Tab"</b>.</li>
+              <li>Refresh the page.</li>
+            </ol>
+          `;
+        } else if (errName === "NotFoundError" || errName === "DevicesNotFoundError") {
+          guideBody.innerHTML = `
+            <b>Cause:</b> No camera hardware detected on this machine.<br>
+            <b>How to Fix:</b> Connect a webcam or verify that your laptop camera privacy shutter is open.
+          `;
+        } else if (errName === "NotReadableError" || errName === "TrackStartError") {
+          guideBody.innerHTML = `
+            <b>Cause:</b> Camera is currently locked by another program (Zoom, Teams, OBS Studio).<br>
+            <b>How to Fix:</b> Close the conflicting software and test again.
+          `;
+        } else {
+          guideBody.innerHTML = `
+            <b>Cause:</b> Hardware or permission constraint.<br>
+            <b>How to Fix:</b> Ensure browser has OS-level camera permission and run in a direct full tab.
+          `;
+        }
+      }
+    }
+
+    // 5. Speech Recognition Test
+    function testSpeech() {
+      const out = document.getElementById("out-speech");
+      setBadge("badge-speech", "idle", "TESTING...");
+      const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!Speech) {
+        setBadge("badge-speech", "fail", "NOT SUPPORTED");
+        out.textContent = "❌ Web Speech API is not natively supported in this browser.\nChrome or Microsoft Edge is recommended for continuous voice recognition.";
+        return;
+      }
+
+      out.textContent = "Listening now! Say: 'Hey Jarvis' or 'Hello' into your microphone...";
+      try {
+        const sr = new Speech();
+        sr.continuous = false;
+        sr.interimResults = true;
+        sr.lang = "en-US";
+
+        sr.onresult = (ev) => {
+          const t = ev.results[0][0].transcript;
+          const conf = Math.round(ev.results[0][0].confidence * 100);
+          setBadge("badge-speech", "pass", "HEARD SPEECH (PASS)");
+          out.textContent = `✅ SPEECH RECOGNITION WORKING!\nTranscript: "${t}"\nConfidence: ${conf || 95}%\nSpeech engine is healthy and ready for PlantTwin JARVIS!`;
+        };
+
+        sr.onerror = (ev) => {
+          setBadge("badge-speech", "warn", ev.error.toUpperCase());
+          out.textContent = `Speech test status: [${ev.error}].\n(If 'no-speech', tap the test button and speak immediately. If 'not-allowed', microphone permission must be granted first).`;
+        };
+
+        sr.start();
+      } catch (e) {
+        setBadge("badge-speech", "fail", "ERROR");
+        out.textContent = `Failed to start speech engine: ${e.message}`;
+      }
+    }
+
+    // Attach Listeners
+    document.getElementById("btn-test-sec").addEventListener("click", testSecurityContext);
+    document.getElementById("btn-test-iframe").addEventListener("click", testIframePolicy);
+    document.getElementById("btn-test-mic").addEventListener("click", testMicrophone);
+    document.getElementById("btn-test-cam").addEventListener("click", testCamera);
+    document.getElementById("btn-test-speech").addEventListener("click", testSpeech);
+
+    document.getElementById("btn-run-all").addEventListener("click", async () => {
+      testSecurityContext();
+      testIframePolicy();
+      await testMicrophone();
+      await testCamera();
+      testSpeech();
+    });
+
+    // Auto run context & iframe on load
+    window.addEventListener("DOMContentLoaded", () => {
+      testSecurityContext();
+      testIframePolicy();
+    });
+  </script>
+</body>
+</html>

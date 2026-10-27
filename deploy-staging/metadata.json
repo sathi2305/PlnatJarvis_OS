@@ -1,0 +1,8 @@
+{
+  "name": "PlantTwin JARVIS OS",
+  "description": "Plant-care digital twin OS combining an interactive 3D plant twin, multilingual JARVIS assistant, plant diaries, watering logs, tasks, reminders, weather lookup, and growth simulation.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

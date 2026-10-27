@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#030a09">
+<title>PlantTwin JARVIS · Advanced</title>
+<style>
+:root{--bg:#030a09;--pn:rgba(8,26,22,.72);--ln:rgba(93,255,176,.22);--g:#5dffb0;--c:#4de1ff;--w:#ffc857;--r:#ff6b6b;--t:#e6fff3;--m:#8fb8a8;color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:radial-gradient(1200px 700px at 50% 40%,#0b2a22 0,var(--bg) 70%);color:var(--t);font:14px/1.5 "Segoe UI",system-ui,sans-serif;overflow-x:hidden;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+body:before{content:"";position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(93,255,176,.035) 0 1px,transparent 1px 4px);pointer-events:none;z-index:9}
+header{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--ln);flex-wrap:wrap}
+.logo{font-weight:800;letter-spacing:.22em;font-size:15px}.logo b{color:var(--g)}
+.chip{font-size:11px;letter-spacing:.12em;padding:4px 10px;border:1px solid var(--ln);border-radius:99px;color:var(--m)}
+.chip i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--w);margin-right:6px;box-shadow:0 0 8px currentColor}
+.chip.on i{background:var(--g)}
+.sp{flex:1}
+select,button,input{font:inherit;color:var(--t)}
+select,.btn{background:rgba(93,255,176,.08);border:1px solid var(--ln);border-radius:10px;padding:7px 12px;cursor:pointer}
+.btn:hover,select:hover{border-color:var(--g);box-shadow:0 0 14px rgba(93,255,176,.25)}
+.btn.pri{background:linear-gradient(135deg,#2cf0a0,#18b6d4);color:#032;font-weight:700;border:0}
+main{display:grid;grid-template-columns:340px minmax(0,1fr) 310px;gap:14px;padding:14px;height:calc(100vh - 62px);min-height:640px}
+.pn{background:var(--pn);border:1px solid var(--ln);border-radius:18px;padding:14px;backdrop-filter:blur(10px);display:flex;flex-direction:column;min-height:0;box-shadow:0 0 30px rgba(0,0,0,.35) inset}
+h2{font-size:11px;letter-spacing:.2em;color:var(--m);font-weight:600;margin-bottom:10px}
+#orbw{display:grid;place-items:center;position:relative}
+#orb{width:190px;height:190px}
+#state{position:absolute;bottom:0;font-size:11px;letter-spacing:.25em;color:var(--g)}
+#log,#plog{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:8px 2px;min-height:90px;scrollbar-width:thin}
+.m{max-width:92%;padding:8px 12px;border-radius:14px;font-size:13px;white-space:pre-wrap}
+.m.j{background:rgba(93,255,176,.1);border:1px solid var(--ln);border-top-left-radius:4px}
+.m.u{align-self:flex-end;background:rgba(77,225,255,.14);border:1px solid rgba(77,225,255,.3);border-top-right-radius:4px}
+#chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+#chips button{font-size:11px;padding:4px 9px;border-radius:99px;border:1px solid var(--ln);background:transparent;cursor:pointer;color:var(--m)}
+#chips button:hover{color:var(--g);border-color:var(--g)}
+form{display:flex;gap:6px}
+input[type=text]{flex:1;min-width:0;background:rgba(0,0,0,.35);border:1px solid var(--ln);border-radius:12px;padding:10px 12px;outline:0}
+input[type=text]:focus{border-color:var(--g)}
+#mic.rec{background:var(--r);color:#fff;animation:pl 1s infinite}
+@keyframes pl{50%{box-shadow:0 0 0 8px rgba(255,107,107,.0),0 0 18px var(--r)}}
+#twin{position:relative;padding:0;overflow:hidden}
+#cv{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+#cv:active{cursor:grabbing}
+.ov{position:absolute;left:16px;top:14px;pointer-events:none}
+.ov h1{font-size:22px;letter-spacing:.06em}.ov small{color:var(--m);letter-spacing:.14em;font-size:11px}
+#tm{position:absolute;left:16px;right:16px;bottom:14px;background:rgba(3,12,10,.78);border:1px solid var(--ln);border-radius:14px;padding:10px 14px}
+#tm div{display:flex;justify-content:space-between;font-size:12px;color:var(--m)}
+#tm b{color:var(--g)}
+input[type=range]{width:100%;accent-color:var(--g)}
+.tools{position:absolute;right:14px;top:14px;display:flex;gap:6px}
+.g3{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rg{text-align:center;padding:8px 4px;border:1px solid var(--ln);border-radius:14px;background:rgba(0,0,0,.2)}
+.ring{--v:50;--rc:#5dffb0;width:68px;height:68px;border-radius:50%;margin:0 auto 4px;display:grid;place-items:center;background:conic-gradient(var(--rc) calc(var(--v)*1%),rgba(255,255,255,.07) 0);-webkit-mask:radial-gradient(circle 24px,#0000 98%,#000 100%);mask:radial-gradient(circle 24px,#0000 98%,#000 100%);filter:drop-shadow(0 0 6px var(--rc))}
+.rg .v{font-size:18px;font-weight:700;margin-top:-52px;height:34px;position:relative;line-height:34px}
+.rg small{display:block;font-size:10px;letter-spacing:.14em;color:var(--m);margin-top:18px}
+#sp{width:100%;height:64px;margin-top:10px}
+.it{display:flex;gap:8px;align-items:center;font-size:12px;padding:6px 8px;border:1px solid var(--ln);border-radius:10px;margin-top:6px}
+.it span{flex:1}
+#items{overflow:auto;min-height:0;flex:1}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#06251c;border:1px solid var(--g);padding:8px 16px;border-radius:12px;opacity:0;transition:.3s;z-index:20;pointer-events:none}
+#toast.s{opacity:1}
+[hidden]{display:none!important}
+.chip.on{color:var(--g);border-color:var(--g)}#en{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);z-index:25;background:#06251c;border:1px solid var(--g);padding:10px 18px;border-radius:99px;cursor:pointer}
+.tabs{display:flex;gap:6px;margin-bottom:8px}.tabs button{flex:1;padding:6px;border:1px solid var(--ln);border-radius:10px;background:transparent;cursor:pointer;color:var(--m);letter-spacing:.12em;font-size:11px}.tabs .on{background:rgba(93,255,176,.16);color:var(--g);border-color:var(--g)}
+.tools{flex-wrap:wrap;justify-content:flex-end;max-width:64%}.tools .btn.on{border-color:var(--g);color:var(--g);box-shadow:0 0 14px rgba(93,255,176,.35)}
+#hw{position:absolute;left:16px;bottom:96px;width:190px;border-radius:10px;border:1px solid var(--g);transform:scaleX(-1);pointer-events:none;overflow:hidden;background:#000}#hw video{display:block;width:100%}#hw canvas{position:absolute;inset:0;width:100%;height:100%}
+#hc{position:fixed;left:0;top:0;width:44px;height:44px;border-radius:50%;border:2px solid var(--c);pointer-events:none;z-index:30;box-shadow:0 0 18px var(--c);background:conic-gradient(rgba(93,255,176,.75) calc(var(--p,0)*360deg),transparent 0)}
+#th{position:absolute;left:16px;top:78px;width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--g)}
+@media(min-width:1101px){body{display:flex;flex-direction:column;height:100vh;overflow:hidden}main{flex:1;height:auto;min-height:0}}
+@media(max-width:1100px){main{grid-template-columns:1fr;height:auto}#twin{height:70vh;min-height:480px;order:-1}#log{max-height:260px}}
+@media(max-width:600px){.tools{top:auto;bottom:100px;right:14px;max-width:none}.ov h1{font-size:18px}#orb{width:150px;height:150px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style></head>
+<body>
+<header>
+  <div class="logo">PLANT<b>TWIN</b> · JARVIS <b>ADVANCED</b></div>
+  <span class="chip" id="lk"><i></i><span>LOCAL MODE</span></span>
+  <span class="chip">SIMULATED TELEMETRY</span><span class="chip" id="cw">🎙 VOICE: STARTING</span><span class="chip" id="ch">🖐 HAND: STARTING</span>
+  <div class="sp"></div>
+  <select id="lang" aria-label="Language"><option>English</option><option>Tamil</option><option>Hindi</option><option>Malayalam</option><option>Telugu</option><option>Kannada</option></select>
+  <a class="btn" href="classic.html" style="text-decoration:none;color:inherit">Classic dashboard</a>
+</header>
+<main>
+  <section class="pn" aria-label="JARVIS">
+    <div class="tabs"><button id="tj" class="on">J.A.R.V.I.S</button><button id="tp">PLANT AI</button></div>
+    <div id="orbw"><canvas id="orb" width="340" height="340"></canvas><div id="state">STANDBY</div></div>
+    <div id="log" aria-live="polite"></div><div id="plog" aria-live="polite" hidden></div>
+    <div id="chips"></div>
+    <form id="f"><input type="text" id="q" placeholder="Command JARVIS…" autocomplete="off" aria-label="Command"><button class="btn pri">Send</button></form>
+  </section>
+  <section class="pn" id="twin" aria-label="Plant digital twin">
+    <canvas id="cv"></canvas>
+    <div class="ov"><h1 id="pn">Fern</h1><small>DIGITAL TWIN · DRAG TO ROTATE · SCROLL TO ZOOM</small></div>
+    <div class="tools"><button class="btn" id="bph" title="Or drag a photo onto the plant">📷 Photo → Twin</button></div>
+    <img id="th" alt="Uploaded plant photo" hidden><div id="hw" hidden><video id="hv" muted playsinline></video><canvas id="ho"></canvas></div><input type="file" id="fi" accept="image/*" hidden>
+    <div id="tm"><div><span>PLANT TIME MACHINE · illustrative growth scenario</span><span>Day <b id="dv">0</b></span></div><input type="range" id="day" min="0" max="90" value="0" aria-label="Simulated day"></div>
+  </section>
+  <aside class="pn" aria-label="Telemetry">
+    <h2>TWIN TELEMETRY</h2>
+    <div class="g3" id="gs"></div>
+    <canvas id="sp" width="560" height="128"></canvas>
+    <h2 style="margin-top:14px">TASKS &amp; REMINDERS <span id="ic"></span></h2>
+    <div id="items"></div>
+    <div class="chip" style="margin-top:10px;border-radius:10px">Values are app-simulated, not live sensor readings.</div>
+  </aside>
+</main>
+<div id="hc" hidden></div><div id="en" hidden>👆 Tap anywhere to enable camera &amp; microphone</div><div id="toast"></div>
+<script>
+"use strict";
+const $=s=>document.querySelector(s),cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+const LOCALHOST=["localhost","127.0.0.1",""].includes(location.hostname);
+let CFG=window.PLANTTWIN_API_BASE_URL||"";if(!LOCALHOST&&/\/\/(127\.0\.0\.1|localhost)/.test(CFG))CFG="";
+const B=(CFG||(LOCALHOST?"http://127.0.0.1:8000":"")).replace(/\/$/,"");
+const S={id:"fern-01",name:"Fern",moist:42,health:92,temp:24,hum:58,lux:680,lt:680,day:0};
+try{Object.assign(S,JSON.parse(localStorage.getItem("ptj13")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("ptj13",JSON.stringify(S))}catch(e){}};
+let link=false,speaking=false,listening=false,auto=true,yaw=.6,pitch=.28,zoom=1,en=.1,lastWarn=0;
+const hist=[];const drops=[];
+async function api(p,o={},t=4000){if(!B){link=false;return null}try{const r=await fetch(B+p,{...o,headers:{"Content-Type":"application/json"},signal:AbortSignal.timeout(t)});if(!r.ok)return null;link=true;return await r.json()}catch(e){link=false;return null}}
+const toast=m=>{const t=$("#toast");t.textContent=m;t.className="s";clearTimeout(toast.h);toast.h=setTimeout(()=>t.className="",2600)};
+
+/* ---------- JARVIS chat + voice ---------- */
+const log=$("#log");
+function add(role,text,L){L=L||log;const e=document.createElement("div");e.className="m "+(role==="j"?"j":"u");L.appendChild(e);
+  if(role!=="j"||matchMedia("(prefers-reduced-motion:reduce)").matches){e.textContent=text}
+  else{let i=0;const h=setInterval(()=>{e.textContent=text.slice(0,++i);L.scrollTop=1e9;if(i>=text.length)clearInterval(h)},14)}
+  L.scrollTop=1e9}
+const LC={English:"en-US",Tamil:"ta-IN",Hindi:"hi-IN",Malayalam:"ml-IN",Telugu:"te-IN",Kannada:"kn-IN"};
+function say(text,t){add("j",text,t||log);if(!("speechSynthesis"in window)){speaking=true;setTimeout(()=>speaking=false,text.length*45);return}
+  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text.replace(/^JARVIS:\s*/,""));u.lang=LC[$("#lang").value];u.onstart=()=>speaking=true;u.onend=u.onerror=()=>speaking=false;speechSynthesis.speak(u)}
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+const status=()=>`${S.name}: hydration ${S.moist.toFixed(0)}%, vigor ${S.health.toFixed(0)}/100, ${S.temp.toFixed(1)}°C, humidity ${S.hum.toFixed(0)}%, light ${S.lux.toFixed(0)} lux. ${S.moist<30?"Hydration is low — I recommend watering.":S.health<70?"Vigor is below ideal; check light and temperature.":"All parameters are in a comfortable range."} (Simulated values, not live sensors.)`;
+async function water(){startRain();const r=await api(`/api/plants/${S.id}/water`,{method:"POST",body:JSON.stringify({amount:22})});save();say(`Making it rain. ${r?"Logged as a watering event in the database":"Logged in this browser only (backend offline)"}. Hydration rises over the next few seconds (simulated).`)}
+async function loadItems(){const l=await api("/api/assistant/items?include_completed=false");const box=$("#items");box.innerHTML="";
+  if(!l){box.innerHTML='<div class="it"><span>Start the backend to sync tasks.</span></div>';return}
+  $("#ic").textContent="· "+l.length;l.slice(0,12).forEach(x=>{const d=document.createElement("div");d.className="it";
+    d.innerHTML=`<span>${x.kind==="reminder"?"⏰":"✅"} </span><button class="btn" style="padding:2px 8px">Done</button>`;d.firstChild.append(x.title+(x.due_at?" · "+new Date(x.due_at).toLocaleString([], {dateStyle:"short",timeStyle:"short"}):""));
+    d.querySelector("button").onclick=async()=>{await api("/api/assistant/items/"+x.id,{method:"PATCH",body:JSON.stringify({completed:true})});loadItems()};box.appendChild(d)})}
+async function cmd(raw){const q=(raw||"").trim();if(!q)return;add("u",q,mode==="p"?$("#plog"):log);$("#q").value="";if(mode==="p")return plantChat(q);const s=q.toLowerCase();let m;if(await extra(s,q))return;
+  if(/^(please )?(water|give water)|water (it|the plant|now)/.test(s))return water();
+  if(/status|health|report|summary|how is/.test(s))return say(status());
+  if(m=s.match(/remind me to (.+?)(?: in (\d+) ?(min|minute|hour|hr)s?)?$/)){const mins=m[2]?+m[2]*(/h/.test(m[3])?60:1):60;
+    const r=await api("/api/assistant/items",{method:"POST",body:JSON.stringify({kind:"reminder",title:m[1],due_at:new Date(Date.now()+mins*6e4).toISOString()})});
+    if(r)loadItems();return say(r?`Reminder set: "${m[1]}" in ${mins} minutes.`:"I couldn't reach the backend to save that reminder.")}
+  if(/future|grow|simulate|time machine|\bdays?\b/.test(s)){m=s.match(/(\d+)/);setDay(m?cl(+m[1],0,90):60);return say(`Projecting day ${S.day}. This is an illustrative growth scenario, not a biological forecast.`)}
+  if(/today|present|reset time|now$/.test(s)){setDay(0);return say("Returned to the present.")}
+  if(m=s.match(/light (?:to )?(\d+)/)){S.lt=cl(+m[1],0,3000);return say(`Target light set to ${S.lt} lux.`)}
+  if(/rotate|spin/.test(s)){auto=!auto;return say(auto?"Auto-rotation on.":"Auto-rotation off.")}
+  if(/weather/.test(s)){const c=(s.match(/ in ([a-z ]+)/)||[])[1]||"Coimbatore";const w=await api("/api/weather?city="+encodeURIComponent(c.trim()),{},23000);
+    if(!w)return say("Weather lookup failed. Check the city and the backend connection.");const k=w.current||{};return say(`${w.location.name}: ${k.temperature_2m}°C, humidity ${k.relative_humidity_2m}%, wind ${k.wind_speed_10m} km/h. This is outdoor weather, not your pot.`)}
+  if(/^(help|commands)/.test(s))return say("Try: make it rain · gestures · status · show 60 days · light 1200 · remind me to prune in 30 minutes · weather in Pollachi · rotate");
+  const r=await api("/api/jarvis/chat",{method:"POST",body:JSON.stringify({message:q,language:$("#lang").value,plant:{id:S.id,name:S.name,moisture:Math.round(S.moist),health:Math.round(S.health),temperature_c:+S.temp.toFixed(1),humidity:Math.round(S.hum),light_lux:Math.round(S.lux)}})},22000);
+  say(r?r.answer:"Backend offline — I can run local commands. Type “help” to see them.")}
+$("#f").onsubmit=e=>{e.preventDefault();cmd($("#q").value)};
+
+function setDay(d){S.day=d;$("#day").value=d;$("#dv").textContent=d}
+$("#day").oninput=e=>setDay(+e.target.value);
+
+/* ---------- twin simulation + telemetry ---------- */
+const gauges=[["HYDRATION","moist","%","#4de1ff"],["VIGOR","health","","#5dffb0"],["TEMP","temp","°","#ffc857",50],["HUMIDITY","hum","%","#4de1ff"]];
+$("#gs").innerHTML=gauges.map((g,i)=>`<div class="rg"><div class="ring" id="r${i}"></div><div class="v" id="v${i}"></div><small>${g[0]}</small></div>`).join("");
+function tick(){S.moist=cl(S.moist-(S.temp>28?.14:.075)*(S.lux>1500?1.4:1),0,100);
+  S.temp=cl(S.temp+(Math.random()-.5)*.2+(24-S.temp)*.02,10,40);S.hum=cl(S.hum+(Math.random()-.5)*.6+(58-S.hum)*.02,20,95);
+  S.lux=cl(S.lux+(Math.random()-.5)*30+(S.lt-S.lux)*.05,0,3000);
+  const tg=100-Math.max(0,35-S.moist)*1.1-Math.max(0,S.moist-85)-Math.max(0,Math.abs(S.temp-24)-5)*3-Math.max(0,300-S.lux)/20;S.health=cl(S.health+(tg-S.health)*.08,0,100);
+  hist.push(S.moist);if(hist.length>60)hist.shift();
+  gauges.forEach((g,i)=>{const v=S[g[1]],r=$("#r"+i);r.style.setProperty("--v",cl(v/(g[4]||100)*100,0,100));r.style.setProperty("--rc",g[1]==="moist"&&v<30?"#ff6b6b":g[3]);$("#v"+i).textContent=Math.round(v)+g[2]});
+  const lk=$("#lk");lk.className="chip"+(link?" on":"");lk.lastChild.textContent=link?"BACKEND LINKED":"LOCAL MODE";
+  $("#state").textContent=speaking?"SPEAKING":listening?"LISTENING":S.moist<30?"ALERT":"ONLINE";
+  if(S.moist<30&&Date.now()-lastWarn>90000){lastWarn=Date.now();say(`Sir, ${S.name}'s hydration has dropped to ${Math.round(S.moist)}%. Say "make it rain" or raise your hand to the cloud.`)}
+  const c=$("#sp").getContext("2d"),W=560,H=128;c.clearRect(0,0,W,H);c.strokeStyle="rgba(93,255,176,.15)";c.beginPath();c.moveTo(0,H*.7);c.lineTo(W,H*.7);c.stroke();
+  c.beginPath();hist.forEach((v,i)=>{const x=i/59*W,y=H-v/100*H;i?c.lineTo(x,y):c.moveTo(x,y)});c.strokeStyle="#4de1ff";c.lineWidth=3;c.shadowColor="#4de1ff";c.shadowBlur=10;c.stroke();c.shadowBlur=0;
+  c.fillStyle="#8fb8a8";c.font="18px sans-serif";c.fillText("HYDRATION · last 60 s (red line = 30% alert)",8,20);save()}
+setInterval(tick,1000);
+
+/* ---------- JARVIS orb ---------- */
+const oc=$("#orb").getContext("2d");
+function drawOrb(t){const s=340,m=170;oc.clearRect(0,0,s,s);const tg=speaking?.9:listening?.65:S.moist<30?.45:.15;en+=(tg-en)*.08;
+  const col=S.moist<30?"255,107,107":"93,255,176";
+  for(let i=0;i<64;i++){const a=i/64*6.283,h=6+en*30*(.5+.5*Math.sin(i*.9+t*6*(.3+en)))+(speaking?Math.random()*10:0);oc.strokeStyle=`rgba(${col},${.35+.5*en})`;oc.lineWidth=3;oc.beginPath();oc.moveTo(m+Math.cos(a)*118,m+Math.sin(a)*118);oc.lineTo(m+Math.cos(a)*(118+h),m+Math.sin(a)*(118+h));oc.stroke()}
+  [[100,[40,18],.6,"77,225,255"],[84,[8,12],-1,col],[66,[90,20],1.3,"255,200,87"]].forEach(([r,d,sp,c])=>{oc.setLineDash(d);oc.lineDashOffset=-t*sp*30;oc.strokeStyle=`rgba(${c},.8)`;oc.lineWidth=3;oc.beginPath();oc.arc(m,m,r,0,6.283);oc.stroke()});oc.setLineDash([]);
+  const cr=40+en*18+Math.sin(t*2)*3,g=oc.createRadialGradient(m,m,0,m,m,cr*1.8);g.addColorStop(0,"#fff");g.addColorStop(.25,`rgba(${col},1)`);g.addColorStop(1,`rgba(${col},0)`);oc.fillStyle=g;oc.beginPath();oc.arc(m,m,cr*1.8,0,6.283);oc.fill()}
+
+/* ---------- 3D plant twin (own projection, no libraries) ---------- */
+const cv=$("#cv"),cx=cv.getContext("2d");let W=0,H=0,sc=100;
+function fit(){const r=cv.parentElement.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);sc=Math.min(W,H)*.19}
+addEventListener("resize",fit);fit();
+function P(x,y,z){const c=Math.cos(yaw),s=Math.sin(yaw),X=x*c+z*s;let Z=-x*s+z*c;const cp=Math.cos(pitch),sp=Math.sin(pitch),Y=y*cp-Z*sp;Z=y*sp+Z*cp;const f=6/(6+Z),k=sc*zoom*f;return[W/2+X*k,H*.64-Y*k,Z,f]}
+const nrm=v=>{const l=Math.hypot(...v)||1;return v.map(a=>a/l)},cr=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const LI=nrm([.45,.8,.4]);
+const motes=Array.from({length:46},()=>({a:Math.random()*6.28,r:.4+Math.random()*1.6,y:Math.random()*3,s:.004+Math.random()*.01}));
+function ring(y,r,n=48){return Array.from({length:n+1},(_,i)=>P(Math.cos(i/n*6.283)*r,y,Math.sin(i/n*6.283)*r))}
+function poly(pts,fill,stroke,w){cx.beginPath();pts.forEach((p,i)=>i?cx.lineTo(p[0],p[1]):cx.moveTo(p[0],p[1]));if(fill){cx.fillStyle=fill;cx.fill()}if(stroke){cx.strokeStyle=stroke;cx.lineWidth=w||1;cx.stroke()}}
+function drawTwin(t){cx.clearRect(0,0,W,H);const gr=S.day/90,hgt=(1.1+1.9*gr)*A.st,hue=S.hue?cl(S.hue-(100-S.health)*.6,30,160):cl(40+S.health*1.1,40,150),stress=1-S.health/100,dr=cl((48-S.moist)/48,0,1)*.9;
+  const g=cx.createRadialGradient(W/2,H*.5,0,W/2,H*.5,Math.min(W,H)*.6);g.addColorStop(0,`hsla(${hue},90%,45%,.28)`);g.addColorStop(1,"transparent");cx.fillStyle=g;cx.fillRect(0,0,W,H);
+  /* holo floor */
+  cx.lineWidth=1.5;[1.5,2.1,2.7].forEach((r,i)=>{cx.setLineDash([10,8]);cx.lineDashOffset=-t*(20+i*14)*(i%2?-1:1);poly(ring(-1,r),null,`rgba(77,225,255,${.55-i*.14})`,1.5)});cx.setLineDash([]);
+  /* scan ring */
+  const sy=-1+((t*.5)%1)*(hgt+1.6);poly(ring(sy,1.35),null,`rgba(93,255,176,${.55*(1-((sy+1)/(hgt+1.6)))})`,2);
+  /* pot */
+  const soilL=10+(100-S.moist)*.14,q=[];for(let k=0;k<28;k++){const a0=k/28*6.283,a1=(k+1)/28*6.283,am=(a0+a1)/2;
+    const pts=[P(Math.cos(a0)*.82,0,Math.sin(a0)*.82),P(Math.cos(a1)*.82,0,Math.sin(a1)*.82),P(Math.cos(a1)*.56,-1,Math.sin(a1)*.56),P(Math.cos(a0)*.56,-1,Math.sin(a0)*.56)];
+    q.push({pts,z:pts.reduce((a,p)=>a+p[2],0)/4,sh:.5+.5*(Math.cos(am)*LI[0]+Math.sin(am)*LI[2])})}
+  q.sort((a,b)=>b.z-a.z).forEach(o=>poly(o.pts,`hsl(165 45% ${10+o.sh*20}%)`,"rgba(93,255,176,.25)",1));
+  poly(ring(0,.8),`hsl(28 35% ${soilL}%)`,"rgba(93,255,176,.8)",2.5);
+  /* stem */
+  const sw=Math.sin(t*1.1)*.03;cx.lineCap="round";cx.strokeStyle=`hsl(${hue} 55% 38%)`;cx.lineWidth=Math.max(3,sc*.05*zoom);cx.beginPath();
+  for(let i=0;i<=12;i++){const p=P(sw*i*i/144*3,i/12*hgt,0);i?cx.lineTo(p[0],p[1]):cx.moveTo(p[0],p[1])}cx.stroke();
+  /* leaves */
+  const n=Math.round(A.n0+gr*(A.n1-A.n0)),L=[];
+  for(let i=0;i<n;i++){const u=i/(n-1),by=.12+u*hgt*A.sh,az=i*2.39996+sw*4*(1+u),e=(A.e0-u*A.e1)-dr*(1.1-u*.3)+Math.sin(t*1.3+i)*.025,len=A.len*(.5+.55*(1-u*.45))*(.55+.45*(.4+gr)),wd=len*A.w*(1-stress*.2);
+    const d=nrm([Math.cos(az)*Math.cos(e),Math.sin(e),Math.sin(az)*Math.cos(e)]),w=nrm(cr(d,[0,1,0])),nn=nrm(cr(w,d)),pts=[],pl=[];
+    for(let k=0;k<=10;k++){const s=k/10,sh=Math.pow(Math.sin(Math.PI*s),.75)*wd,cu=-(.35+dr*.6)*s*s*len*.5,b=[d[0]*len*s,d[1]*len*s+cu,d[2]*len*s];pl.push([b[0]+w[0]*sh,b[1]+w[1]*sh+by,b[2]+w[2]*sh]);pts.push([b[0]-w[0]*sh,b[1]-w[1]*sh+by,b[2]-w[2]*sh])}
+    const all=pl.concat(pts.reverse()).map(p=>P(p[0],p[1],p[2])),sh=Math.abs(nn[0]*LI[0]+nn[1]*LI[1]+nn[2]*LI[2]);
+    L.push({all,z:all.reduce((a,p)=>a+p[2],0)/all.length,sh,hue:hue-u*8,mid:[P(0,by,0),all[10]]})}
+  L.sort((a,b)=>b.z-a.z).forEach(o=>{poly(o.all,`hsl(${o.hue} ${70-stress*30}% ${16+o.sh*34}%)`,`hsla(${o.hue},90%,70%,.55)`,1.2);cx.strokeStyle=`hsla(${o.hue},80%,75%,.5)`;cx.lineWidth=1;cx.beginPath();cx.moveTo(o.mid[0][0],o.mid[0][1]);cx.lineTo(o.mid[1][0],o.mid[1][1]);cx.stroke()});
+  rainFx(t);
+  /* motes */
+  motes.forEach(m=>{m.y+=m.s;m.a+=.004;if(m.y>hgt+1.8)m.y=-.9;const p=P(Math.cos(m.a)*m.r,m.y,Math.sin(m.a)*m.r);cx.fillStyle=`hsla(${hue},100%,75%,${.5*(1-m.y/(hgt+2))})`;cx.beginPath();cx.arc(p[0],p[1],1.6*p[3]+.4,0,6.283);cx.fill()});
+  /* callouts */
+  const co=[["VIGOR",Math.round(S.health),P(0,hgt+.2,0),"#5dffb0"],["HYDRATION",Math.round(S.moist)+"%",P(.2,hgt*.45,0),"#4de1ff"],["ROOT ZONE",S.temp.toFixed(1)+"°C",P(.55,-.5,0),"#ffc857"]];
+  cx.font="600 12px 'Segoe UI',sans-serif";co.forEach((c,i)=>{const x=Math.min(W-130,c[2][0]+70+i*8),y=c[2][1]-18-i*4;cx.strokeStyle=c[3];cx.lineWidth=1;cx.beginPath();cx.moveTo(c[2][0],c[2][1]);cx.lineTo(x-4,y);cx.lineTo(x+110,y);cx.stroke();cx.fillStyle=c[3];cx.beginPath();cx.arc(c[2][0],c[2][1],3,0,6.283);cx.fill();cx.fillText(c[0]+"  "+c[1],x,y-5)});
+  $("#pn").textContent=S.name+(S.day?`  ·  Day +${S.day}`:"")}
+
+/* ---------- V14: Plant AI tab, news, PC control, wake word, photo→twin, hand control ---------- */
+let mode="j",pend=null,awaitUntil=0,always=false,wrec=null,KB={};
+const ARCH={broad:{n0:7,n1:22,len:1,w:.34,e0:1,e1:.55,sh:.98,st:1},strap:{n0:8,n1:16,len:1.7,w:.1,e0:1.35,e1:.15,sh:.3,st:.6},small:{n0:18,n1:40,len:.38,w:.55,e0:1,e1:.6,sh:1,st:1.1},rosette:{n0:10,n1:18,len:.95,w:.22,e0:.85,e1:.5,sh:.12,st:.3}};
+let A=ARCH[S.arch]||ARCH.broad;
+const PL=$("#plog");
+function chips(m){const c=$("#chips");c.innerHTML="";(m==="j"?["make it rain","what's the news today","show D drive","go to sleep","wake up","show 60 days","help"]:["How often should I water?","Is it safe for pets?","What light does it need?","Why are leaves yellow?"]).forEach(t=>{const b=document.createElement("button");b.textContent=t;b.type="button";b.onclick=()=>cmd(t);c.appendChild(b)})}
+function setMode(m){mode=m;log.hidden=m!=="j";PL.hidden=m!=="p";$("#tj").classList.toggle("on",m==="j");$("#tp").classList.toggle("on",m==="p");$("#q").placeholder=m==="j"?"Command JARVIS…":"Ask Plant AI…";chips(m)}
+$("#tj").onclick=()=>setMode("j");$("#tp").onclick=()=>setMode("p");
+function matchSpecies(t){t=(t||"").toLowerCase();for(const k in KB)if(t.includes(k)){S.species=k;S.arch=KB[k].arch;A=ARCH[S.arch]||ARCH.broad;toast("Twin set to "+KB[k].name);return k}return null}
+async function plantChat(q){matchSpecies(q);const r=await api("/api/plant/chat",{method:"POST",body:JSON.stringify({message:q,language:$("#lang").value,species:S.species||null,plant:{name:S.name,species:S.species,moisture:Math.round(S.moist),health:Math.round(S.health)}})},22000);
+  if(!r)return say("Plant AI needs the backend running (python -m uvicorn app.main:app).",PL);
+  say(r.answer,PL);if(r.mode==="knowledge-base")add("j","Source: built-in plant knowledge base"+(r.note?" · "+r.note:""),PL)}
+/* PC control + news (voice/text) — consequential actions need a spoken/typed confirm */
+async function pcDo(a,d){if(!B)return say("PC control only works with the local backend running on your own Windows PC.");try{const r=await fetch(B+"/api/pc/action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:a,confirmed:true,drive:d||"D"}),signal:AbortSignal.timeout(8000)});const j=await r.json().catch(()=>({}));
+  if(!r.ok)return say("PC action NOT performed: "+(j.detail||r.status));say(j.message);if(j.items)say("Items in "+(d||"D")+": drive: "+j.items.slice(0,12).join(", "))}catch(e){say("I couldn't reach the backend, so nothing was done on the PC.")}}
+async function extra(s,q){
+  if(/\brain|water (it|the plant|now)|^(please )?water\b/.test(s)&&!/weather|tomorrow|forecast|will it|going to/.test(s)){await water();return true}
+  if(/gesture|hand help/.test(s)){say("Gestures: wave an open palm = hello · raise your open palm high for 1 s = rain · swipe an open palm left/right = growth ±15 days · make a fist over the plant and move = rotate/zoom · point with your index finger to move the cursor · pinch thumb+index = click.");return true}
+  if(/(stop|turn off|disable) (the )?(camera|hand)/.test(s)){stopHand();say("Camera and hand tracking are off.");return true}
+  if(/(start|turn on|enable) (the )?(camera|hand)/.test(s)){say((await startHand())?"Hand tracking is on.":"I couldn't open the camera — check permission.");return true}
+  if(/stop listening|mute yourself/.test(s)){always=false;if(wrec)wrec.stop();chip("#cw","🎙 VOICE: PAUSED (type “start listening”)",0);say("Voice listening paused.");return true}
+  if(/start listening|resume listening/.test(s)){say(startWake()?"Listening for Hey Jarvis.":"Speech recognition isn't available in this browser.");return true}
+  if(/(upload|add|new|use).*(photo|picture|image)/.test(s)){say("Drag a plant photo onto the twin, or tap the 📷 control. Browsers don't let voice open the file picker.");return true}
+  if(pend){if(Date.now()>pend.exp)pend=null;else if(/\b(confirm|yes|proceed|do it|go ahead)\b/.test(s)){const p=pend;pend=null;await pcDo(p.a);return true}else if(/\b(cancel|no|stop|never ?mind|abort)\b/.test(s)){pend=null;say("Cancelled. Nothing was changed on the PC.");return true}}
+  const ask=(a,l)=>{pend={a,exp:Date.now()+15000};say(`Do you really want me to ${l}? Say or type "confirm" within 15 seconds, or "cancel".`);return true};
+  if(/wake up|walk up|are you there|you there/.test(s)){say("I'm awake and ready. How can I help?");return true}
+  if(/(cancel|abort|stop) (the )?(shut ?down|restart)/.test(s)){await pcDo("cancel_shutdown");return true}
+  if(/shut ?down|power off|turn off (the )?(pc|computer)/.test(s))return ask("shutdown","shut down the PC (30-second countdown)");
+  if(/restart|reboot/.test(s))return ask("restart","restart the PC (30-second countdown)");
+  if(/\bsleep\b/.test(s))return ask("sleep","put the PC to sleep");
+  if(/lock (the )?(pc|computer|screen)/.test(s))return ask("lock","lock the PC");
+  let m;if(m=s.match(/\b(?:open|show|give|go to)\b.*?\b([a-z])(?::| drive)/)){await pcDo("open_drive",m[1].toUpperCase());return true}
+  if(/news|headlines/.test(s)){const tp=/tech/.test(s)?"tech":/science/.test(s)?"science":/world/.test(s)?"world":"india";const n=await api("/api/news?topic="+tp+"&limit=5",{},15000);
+    if(!n||!n.items.length){say("I couldn't fetch the news right now. Check the backend and your internet connection.");return true}
+    say(`Top ${tp} headlines from ${n.source}: `+n.items.map((x,i)=>`${i+1}. ${x.title}`).join("  "));return true}
+  return false}
+/* wake word: "Hey Jarvis …" (browser speech recognition, Chrome/Edge) */
+function wakeLoop(){if(!always||!SR)return;wrec=new SR();wrec.continuous=true;wrec.interimResults=false;wrec.lang=LC[$("#lang").value];
+  wrec.onresult=e=>{if(speaking)return;const t=e.results[e.results.length-1][0].transcript.trim(),m=t.toLowerCase().match(/(?:hey|hi|hello|ok|okay|ha)?[ ,]*(?:jarvis|jarvish|jar vis|javis|service)[,.!? ]*(.*)$/);
+    if(!m){if(Date.now()<awaitUntil){awaitUntil=0;cmd(t)}return}const rest=m[1].trim();if(!rest){say("Yes? I'm listening.");awaitUntil=Date.now()+8000}else cmd(rest)};
+  wrec.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){always=false;chip("#cw","🎙 VOICE: MIC BLOCKED",0);toast("Microphone permission denied")}};
+  wrec.onstart=()=>listening=true;wrec.onend=()=>{listening=false;if(always)setTimeout(wakeLoop,300)};try{wrec.start()}catch(e){}}
+function startWake(){if(!SR){chip("#cw","🎙 VOICE: USE CHROME/EDGE",0);return false}if(always&&wrec)return true;always=true;wakeLoop();chip("#cw","🎙 SAY “HEY JARVIS”",1);return true}
+const rain={end:0,k:0,d:Array.from({length:150},()=>({x:Math.random(),y:Math.random(),v:.012+Math.random()*.014})),rp:[]};let rlt=0;
+function startRain(){rain.end=performance.now()+6500}
+function rainFx(t){const now=performance.now(),on=now<rain.end;rain.k+=((on?1:0)-rain.k)*.06;const dt=Math.min(.1,Math.max(0,t-rlt));rlt=t;if(on)S.moist=cl(S.moist+22/6.5*dt,0,100);
+  const cw=Math.min(W*.5,420),cxp=W/2,cy=H*.11;cx.fillStyle=`rgba(130,180,200,${.1+.4*rain.k})`;[[-.28,.02,.2],[0,-.03,.26],[.27,.03,.19],[.05,.05,.3]].forEach(([a,b,r])=>{cx.beginPath();cx.ellipse(cxp+a*cw,cy+b*cw,r*cw*.6,r*cw*.38,0,0,6.283);cx.fill()});
+  if(hs.on&&rain.k<.1){cx.fillStyle="rgba(143,184,168,.8)";cx.font="11px sans-serif";cx.textAlign="center";cx.fillText("raise your hand here for rain",cxp,cy+cw*.3);cx.textAlign="left"}
+  if(rain.k>.02){cx.strokeStyle=`rgba(120,215,255,${.7*rain.k})`;cx.lineWidth=1.4;cx.beginPath();rain.d.forEach(d=>{d.y+=d.v*(.5+rain.k);if(d.y>1){d.y=cy/H;d.x=.5+(Math.random()-.5)*.8}const x=d.x*W,y=d.y*H;cx.moveTo(x,y);cx.lineTo(x-3,y+16)});cx.stroke();
+    if(rain.k>.3&&rain.rp.length<24)rain.rp.push({x:(Math.random()-.5)*1.3,z:(Math.random()-.5)*1.3,age:0})}
+  rain.rp=rain.rp.filter(p=>(p.age+=.03)<1);rain.rp.forEach(p=>{const rr=p.age*.3;poly(Array.from({length:17},(_,i)=>P(p.x+Math.cos(i/16*6.283)*rr,.01,p.z+Math.sin(i/16*6.283)*rr)),null,`rgba(150,230,255,${.7*(1-p.age)})`,1.2)})}
+function chip(id,txt,on){const e=$(id);e.textContent=txt;e.className="chip"+(on?" on":"")}
+async function autoStart(){const a=await startHand(),b=startWake();if(!(a&&b)){$("#en").hidden=false;addEventListener("pointerdown",async()=>{$("#en").hidden=true;await startHand();startWake()},{once:true})}}
+/* photo → twin: colour + silhouette analysis in the browser; optional species naming via vision model */
+const hueOf=(r,g,b)=>{const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn||1;let h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;return (h*60+360)%360};
+$("#bph").onclick=()=>$("#fi").click();$("#fi").onchange=e=>{photo(e.target.files[0]);e.target.value=""};
+function photo(f){if(!f||!f.type.startsWith("image/"))return toast("Choose an image file");if(f.size>8e6)return toast("Choose an image under 8 MB");
+  const url=URL.createObjectURL(f),im=new Image();im.onerror=()=>toast("Could not read that image");
+  im.onload=()=>{const w=160,h=Math.max(1,Math.round(160*im.height/im.width)),c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(im,0,0,w,h);const d=x.getImageData(0,0,w,h).data,mk=new Uint8Array(w*h);let n=0,sx=0,sy=0,hs=0;
+    for(let i=0;i<w*h;i++){const r=d[i*4],g=d[i*4+1],b=d[i*4+2];if(g>60&&g>r*1.05&&g>b*1.1){mk[i]=1;n++;sx+=i%w;sy+=(i/w)|0;hs+=hueOf(r,g,b)}}
+    if(n<w*h*.02){URL.revokeObjectURL(url);return say("I couldn't find enough green leaf area. Try a closer, well-lit photo of the plant.",PL)}
+    const mx=sx/n,my=sy/n;let a=0,b2=0,cc=0,per=0,hr=0,vr=0;
+    for(let i=0;i<w*h;i++)if(mk[i]){const X=i%w,Y=(i/w)|0,dx=X-mx,dy=Y-my;if(X===0||!mk[i-1])hr++;if(Y===0||!mk[i-w])vr++;a+=dx*dx;b2+=dy*dy;cc+=dx*dy;if(X<1||Y<1||X>w-2||Y>h-2||!mk[i-1]||!mk[i+1]||!mk[i-w]||!mk[i+w])per++}
+    a/=n;b2/=n;cc/=n;const tr=a+b2,sq=Math.sqrt(Math.max(0,tr*tr/4-(a*b2-cc*cc))),el=Math.sqrt((tr/2+sq)/Math.max(tr/2-sq,1e-6)),pr=per/n;
+    const tall=hr/Math.max(vr,1);const mr=2*n/Math.max(hr+vr,1);S.arch=tall>2.4?"strap":(pr>.4||mr<15)?"small":"broad";S.species=null;S.hue=cl(hs/n,60,150);A=ARCH[S.arch];
+    try{S.thumb=c.toDataURL("image/jpeg",.6)}catch(e){}$("#th").src=S.thumb||url;$("#th").hidden=false;setMode("p");save();
+    say(`Twin rebuilt from your photo: ${S.arch} leaf type (tallness ${tall.toFixed(1)}, leaf size ${mr.toFixed(0)}px, edge ratio ${pr.toFixed(2)}), leaf colour hue ${Math.round(S.hue)}°. This is a colour/silhouette approximation, not a 3D scan. Analysing species…`,PL);
+    const rd=new FileReader();rd.onload=async()=>{if(!B)return say("Photo applied locally. Species naming needs the backend with a vision API key. Tell me the plant, e.g. “this is a monstera”.",PL);try{const r=await fetch(B+"/api/plants/analyze-image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image_data_url:rd.result,language:$("#lang").value,plant_name:S.name}),signal:AbortSignal.timeout(40000)}),j=await r.json();if(!r.ok)throw new Error(j.detail||"failed");say(j.analysis,PL);matchSpecies(j.analysis)}catch(e){say("Species naming unavailable ("+e.message+"). Tell me the plant, e.g. “this is a monstera”, and I'll set the twin.",PL)}};rd.readAsDataURL(f)};im.src=url}
+/* hand control: Google MediaPipe Hands (bundled in /vendor/mediapipe, runs offline in the browser) → 21 landmarks → gestures */
+const hv=$("#hv"),ho=$("#ho"),hoc=ho.getContext("2d"),hw=$("#hw"),hc=$("#hc");
+const hs={on:false,stream:null,model:null,busy:false,frames:0,x:.5,y:.5,px:.5,py:.5,seen:0,xs:[],g:"",pinch:false,last:0,greet:-1e9,hold:0,rz:0,rr:-1e9,sw:-1e9};
+const D=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),CON=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+function gesture(l){const sz=D(l[0],l[9])||.1,ex=(t,p)=>D(l[t],l[0])>D(l[p],l[0])*1.12,i=ex(8,6),m=ex(12,10),r=ex(16,14),p=ex(20,18),n=i+m+r+p;
+  if(D(l[4],l[8])/sz<.3)return"PINCH";if(n===4)return"OPEN PALM";if(n===0)return"FIST";if(i&&!m&&!r&&!p)return"POINTING";return"HAND"}
+function waveRev(a){let rev=0,dir=0,e=a[0][1];for(const[,x]of a){if(!dir){if(Math.abs(x-e)>.05){dir=Math.sign(x-e);e=x}}else if(dir>0){if(x>e)e=x;else if(e-x>.05){rev++;dir=-1;e=x}}else{if(x<e)e=x;else if(x-e>.05){rev++;dir=1;e=x}}}return rev}
+function onHand(res){hs.frames++;const L=res.multiHandLandmarks&&res.multiHandLandmarks[0],now=performance.now();ho.width=hv.videoWidth||320;ho.height=hv.videoHeight||240;hoc.clearRect(0,0,ho.width,ho.height);
+  if(!L){const msg=now-hs.last>4000?"🖐 HAND: NOT SEEN — MOVE PALM CLOSER (40–60 cm) AND ADD LIGHT":"🖐 HAND: SHOW YOUR PALM";if(hs.g!==msg){hs.g=msg;chip("#ch",msg,1)}hc.style.opacity=.25;hs.xs=[];hs.hold=0;return}
+  hoc.strokeStyle="#5dffb0";hoc.lineWidth=2;hoc.beginPath();CON.forEach(([a,b])=>{hoc.moveTo(L[a].x*ho.width,L[a].y*ho.height);hoc.lineTo(L[b].x*ho.width,L[b].y*ho.height)});hoc.stroke();hoc.fillStyle="#ffc857";L.forEach(q=>{hoc.beginPath();hoc.arc(q.x*ho.width,q.y*ho.height,2.5,0,6.283);hoc.fill()});
+  const g=gesture(L),wx=1-L[0].x,wy=L[0].y,lab=D(L[0],L[9])<.08?"TOO FAR — MOVE CLOSER":g;if(lab!==hs.g){hs.g=lab;chip("#ch","🖐 HAND: "+lab,1)}hs.seen=hs.last=now;
+  hs.px=hs.x;hs.py=hs.y;const cp=g==="FIST"?L[9]:L[8];if(g==="FIST"||D(L[4],L[8])/(D(L[0],L[9])||.1)>.45){hs.x+=(1-cp.x-hs.x)*.5;hs.y+=(cp.y-hs.y)*.5}const X=hs.x*innerWidth,Y=hs.y*innerHeight;hc.hidden=false;hc.style.opacity=1;hc.style.transform=`translate(${X-22}px,${Y-22}px)`;hc.style.setProperty("--p",g==="PINCH"?1:0);
+  const el=document.elementFromPoint(X,Y);
+  if(g==="PINCH"&&!hs.pinch){hs.pinch=true;const bt=el&&el.closest("button,[data-hand]");if(bt)bt.click()}else if(g!=="PINCH")hs.pinch=false;
+  if(g==="FIST"&&el===cv){yaw+=(hs.x-hs.px)*7;zoom=cl(zoom*(1-(hs.y-hs.py)*1.6),.6,2.2);auto=false}
+  if(g==="OPEN PALM"){hs.xs.push([now,wx]);hs.xs=hs.xs.filter(p=>now-p[0]<1500);const rev=waveRev(hs.xs),rc=hs.xs.filter(p=>now-p[0]<500);
+    if(rev>=2&&now-hs.greet>9000){hs.greet=now;hs.xs=[];say("Hello! I can see you waving. Good to see you. How can I help?")}
+    else if(rc.length>4&&waveRev(rc)===0&&now-hs.sw>1200&&Math.abs(rc[rc.length-1][1]-rc[0][1])>.3){hs.sw=now;const d=rc[rc.length-1][1]>rc[0][1]?15:-15;setDay(cl(S.day+d,0,90));hs.xs=[];toast("Swipe → day "+S.day)}
+    if(wy<.3){hs.rz=hs.rz||now;if(now-hs.rz>900&&now-hs.rr>8000){hs.rr=now;hs.rz=0;water()}}else{hs.rz=0;hs.hold=hs.hold||now;if(now-hs.hold>1500&&now-hs.greet>12000){hs.greet=now;say("Hello! I see you. How can I help?")}}}
+  else{hs.rz=0;hs.hold=0;if(g!=="OPEN PALM")hs.xs=[]}}
+const loadScript=src=>new Promise((ok,no)=>{const e=document.createElement("script");e.src=src;e.onload=ok;e.onerror=()=>no(new Error("could not load "+src));document.head.appendChild(e)});
+async function loopHand(){if(!hs.on)return;if(!hs.busy&&hv.readyState>=2){hs.busy=true;try{await hs.model.send({image:hv})}catch(e){console.warn(e)}hs.busy=false}requestAnimationFrame(loopHand)}
+const MP=location.protocol==="file:"?"https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/":"vendor/mediapipe/";
+async function startHand(){if(hs.on)return true;if(!navigator.mediaDevices){chip("#ch","🖐 HAND: NEEDS HTTPS OR LOCALHOST",0);return false}try{chip("#ch","🖐 HAND: LOADING MODEL…",0);
+  if(!window.Hands)await loadScript(MP+"hands.js");
+  if(!hs.model){const m=new Hands({locateFile:f=>MP+f});m.setOptions({maxNumHands:1,modelComplexity:0,minDetectionConfidence:.5,minTrackingConfidence:.5});m.onResults(onHand);await m.initialize();hs.model=m}
+  hs.stream=await navigator.mediaDevices.getUserMedia({video:{width:640,height:480,facingMode:"user"}});hv.srcObject=hs.stream;await hv.play();hs.on=true;hs.last=performance.now();hw.hidden=false;hc.hidden=false;chip("#ch","🖐 HAND: SHOW YOUR PALM",1);loopHand();return true}
+  catch(e){console.warn(e);chip("#ch","🖐 HAND: "+(e&&e.name==="NotAllowedError"?"CAMERA BLOCKED":e&&e.name==="NotFoundError"?"NO CAMERA":(location.protocol==="file:"?"NEEDS INTERNET (model from CDN)":"FAILED TO START")),0);return false}}
+function stopHand(){if(!hs.on)return;hs.on=false;hs.stream.getTracks().forEach(t=>t.stop());hw.hidden=hc.hidden=true;chip("#ch","🖐 HAND: OFF (say “start camera”)",0)}
+if(S.thumb){$("#th").src=S.thumb;$("#th").hidden=false}
+if(location.protocol==="file:"){const l=document.querySelector("header a.btn");if(l)l.remove()}
+if(!B){const c=document.createElement("span");c.className="chip";c.textContent="STANDALONE · LOCAL MODE";$("header .sp").before(c)}
+autoStart();
+setMode("j");add("j","Plant AI is a separate assistant for plant-care questions. Upload a photo or say “this is a snake plant”.",PL);
+api("/api/plant/kb").then(k=>{if(k){KB=k;if(S.species)matchSpecies(S.species)}});
+$("#twin").addEventListener("dragover",e=>e.preventDefault());$("#twin").addEventListener("drop",e=>{e.preventDefault();photo(e.dataTransfer.files[0])});
+/* interaction */
+let dg=null;cv.onpointerdown=e=>{dg=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId);auto=false};
+cv.onpointermove=e=>{if(!dg)return;yaw+=(e.clientX-dg[0])*.008;pitch=cl(pitch+(e.clientY-dg[1])*.006,-.2,1.1);dg=[e.clientX,e.clientY]};
+cv.onpointerup=()=>dg=null;cv.addEventListener("wheel",e=>{e.preventDefault();zoom=cl(zoom*(e.deltaY>0?.93:1.07),.6,2.2)},{passive:false});
+let t0=performance.now();(function loop(n){if(hs.on&&n-(loop.l||0)<33){requestAnimationFrame(loop);return}loop.l=n;const t=(n-t0)/1000;if(auto)yaw+=.004;drawTwin(t);drawOrb(t);requestAnimationFrame(loop)})(t0);
+
+/* ---------- boot ---------- */
+setDay(S.day);
+api("/api/plants/"+S.id).then(p=>{if(p){S.name=p.name;S.moist=p.moisture;S.temp=p.temperature_c;S.hum=p.humidity;S.lux=S.lt=p.light_lux}loadItems()});
+say(`Good day. JARVIS online. ${S.name}'s twin is active. Just say "Hey Jarvis", wave at the camera, or type.`);
+</script></body></html>
